@@ -1,0 +1,13 @@
+<h1 id=header>Hello world!</h1>
+<meta charset="utf-8"></meta>
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <p id="firstLine">Action log:</p>
+    <p id="actionLog"></p>
+    <input id="commandLine" onkeyup="onCommandLineKeyPressed(event);"></input>
+    <button id="enterCommand" onclick="onCommandEntered();">Do</button>
+    <button id="clearLog" onclick="onClearLog();">ClearLog</button>
+    <script src="script.js" type="module"></script>
+</body>
