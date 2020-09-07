@@ -37,3 +37,8 @@ h1, p {
     color: #e0e0e0;
     padding: 4px 16px;
 }
+
+#license {
+    bottom: 0%;
+    position: fixed;
+}
