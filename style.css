@@ -6,36 +6,16 @@ h1, p {
     color: white;
 }
 
-#actionLog {
-    width: 300px;
-    height: 200px;
-    color: #e0e0e0;
-    background: #2f2f2f;
-    border: 2px solid rgb(170, 170, 170);
-    border-radius: 8px;
-    padding: 20px;
-    overflow: auto;
+.grassland {
+    height: 25px;
+    width: 25px;
+    background-color: #00ff00;
 }
 
-#enterCommand,
-#clearLog {
-    background-color: #333333; /* Green */
-    border: 2px solid #8a8a8a;
-    border-radius: 8px;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    font-size: 14px;
-    padding: 4px 16px;
-}
-
-#commandLine {
-    width: 300px;
-    background: #2f2f2f;
-    border: 2px solid rgb(170, 170, 170);
-    border-radius: 8px;
-    color: #e0e0e0;
-    padding: 4px 16px;
+.desert {
+    height: 25px;
+    width: 25px;
+    background-color: #ffff00;
 }
 
 #license {
