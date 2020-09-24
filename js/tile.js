@@ -2,6 +2,9 @@
 
 class Tile {
     constructor(stats) {
+        this.x = 0
+        this.y = 0
+
         for (var key in stats)
             this[key] = stats[key]
 
@@ -32,7 +35,7 @@ const TILE_GRASSLAND = {
 
 const TILE_DESERT = {
     id: 'desert',
-    plantFoodCapacity: 5,
+    plantFoodCapacity: 8,
     creatureMassCapacity: 100,
     flags: []
 }
