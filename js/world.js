@@ -27,7 +27,7 @@ class World {
         const left  = (x > 0) ? (x - 1) : (this.width - 1)
         const right = (x < this.width - 1) ? (x + 1) : 0
         const up    = (y > 0) ? (y - 1) : (this.height - 1)
-        const down  = (x < this.height - 1) ? (y + 1) : 0
+        const down  = (y < this.height - 1) ? (y + 1) : 0
         return [
             this.tile(left, y),
             this.tile(right, y),
@@ -48,7 +48,7 @@ class World {
     }
 
     generateTiles() {
-        const GEN_CHANCE_GRASSLAND = 0.03
+        const GEN_CHANCE_GRASSLAND = 0.08
         for (let i = 0; i < this.width * this.height; ++i) {
             let tileType = {}
             if (Math.random() < GEN_CHANCE_GRASSLAND) {

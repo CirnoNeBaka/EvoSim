@@ -35,7 +35,7 @@ const TILE_GRASSLAND = {
 
 const TILE_DESERT = {
     id: 'desert',
-    plantFoodCapacity: 8,
+    plantFoodCapacity: 5,
     creatureMassCapacity: 100,
     flags: []
 }

@@ -10,6 +10,7 @@ let world = new World()
 world.generateTiles()
 
 let gameEngine = new Game(world)
+let currentTile = null
 
 renderWorld(world)
 
@@ -41,11 +42,17 @@ function renderWorld(world) {
 }
 
 function renderTile(tile) {
-    let creatures = gameEngine.world.creaturesAt(tile.x, tile.y)
     let tileView = document.getElementById("tileView")
     tileView.innerHTML = ""
+    if (!tile)
+        return;
 
-    tileView.innerText += `\ud83c\udf31: ${tile.food.plant}/${tile.plantFoodCapacity}\n`
+    let creatures = gameEngine.world.creaturesAt(tile.x, tile.y)
+
+    tileView.innerText += `x: ${tile.x} y: ${tile.y}\n`
+    tileView.innerText += `🌱: ${tile.food.plant}/${tile.plantFoodCapacity}\t`
+    tileView.innerText += `🍖: ${tile.food.meat}\t`
+    tileView.innerText += `🦴: ${tile.food.carrion}\n`
 
     for (let i in creatures) {
         let creature = creatures[i]
@@ -56,12 +63,14 @@ function renderTile(tile) {
 function onSimulateOneTurn() {
     gameEngine.processTurn()
     renderWorld(gameEngine.world)
+    renderTile(currentTile)
 }
 
 function onClickTile(x, y) {
     let tile = gameEngine.world.tile(x, y)
     console.log(tile, gameEngine.world.creaturesAt(x, y))
     renderTile(tile)
+    currentTile = tile
 }
 
 document.onSimulateOneTurn = onSimulateOneTurn
