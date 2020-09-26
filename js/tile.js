@@ -1,5 +1,20 @@
 'use strict'
 
+const FOOD_TYPES = [ 'plant', 'meat', 'carrion' ]
+
+class Food {
+    constructor(amounts) {
+        for (let type of FOOD_TYPES) {
+            const amount = (amounts && amounts.hasOwnProperty(type)) ? amounts[type] : 0
+            this[type] = amount
+        }
+    }
+
+    types() {
+        return Object.keys(this)
+    }
+}
+
 class Tile {
     constructor(stats) {
         this.x = 0
@@ -8,11 +23,7 @@ class Tile {
         for (var key in stats)
             this[key] = stats[key]
 
-        this.food = {
-            plant: 0,
-            meat: 0,
-            carrion: 0,
-        }
+        this.food = new Food()
     }
 
     refresh() {
@@ -40,9 +51,18 @@ const TILE_DESERT = {
     flags: []
 }
 
+const TILE_SEA = {
+    id: 'sea',
+    plantFoodCapacity: 50,
+    creatureMassCapacity: 500,
+    flags: [ 'WATER' ]
+}
+
 export {
+    Food,
     Tile,
 
     TILE_GRASSLAND,
-    TILE_DESERT
+    TILE_DESERT,
+    TILE_SEA,
 }

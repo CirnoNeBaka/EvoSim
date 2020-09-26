@@ -35,6 +35,7 @@ class Creature {
         this.energy = this.energyConsumption()
         this.fat = 0
         this.age = 0
+        this.generation = 0
         this.alive = true
     }
 
@@ -42,12 +43,17 @@ class Creature {
         return Object.keys(this.genes).includes(geneID)
     }
 
+    genePower(geneID) {
+        const gene = this.genes[geneID]
+        return gene ? gene.power : 0
+    }
+
     mass() {
-        return this.genes.MASS.power * 10
+        return this.genePower('MASS') * 10 + this.genePower('FAT') * 5
     }
 
     speed() {
-        return Math.max(1, this.genes.SPEED.power * 10 - this.mass() / 2) 
+        return Math.floor(Math.max(1, this.genes.SPEED.power * 10 - this.mass() / 2))
     }
 
     energyConsumption() {
@@ -89,26 +95,38 @@ class Creature {
         return bestTile
     }
 
+    isHungry() {
+        const needEnergy = this.energy < this.energyConsumption()
+        const needFat = this.hasGene('FAT') && this.fat < this.fatCapacity()
+        return needEnergy || needFat
+    }
+
     feed(food) {
         // everyone is a herbivore yet
-        const plantFoodConsumed = Math.min(food.plant, this.energyConsumption())
-        this.energy += plantFoodConsumed
-        food.plant -= plantFoodConsumed
 
-        if (this.genes.FAT) {
+        //console.log("feed:", food, `${this.energy}/${this.energyConsumption()}; ${this.fat}/${this.fatCapacity()}`)
+
+        if (this.energy < this.energyConsumption()) {
             const energyDeficit = this.energyConsumption() - this.energy
-            if (energyDeficit > 0) {
-                const energyGainedFromFat = Math.min(this.fat, energyDeficit)
-                this.fat -= energyGainedFromFat
-                this.energy += energyGainedFromFat
-            }
+            const plantFoodConsumed = Math.min(food.plant, energyDeficit)
+            this.energy += plantFoodConsumed
+            food.plant -= plantFoodConsumed
+        }
+
+        if (this.hasGene('FAT')) {
+            const energyDeficit = this.energyConsumption() - this.energy
+            const energyGainedFromFat = Math.min(this.fat, energyDeficit)
+            this.energy += energyGainedFromFat
+            this.fat -= energyGainedFromFat
 
             const freeFatCapacity = this.fatCapacity() - this.fat
             const addEnergyToFat = Math.min(food.plant, freeFatCapacity)
             this.fat += addEnergyToFat
             food.plant -= addEnergyToFat
         }
-        //console.log(this, "eaten", plantFoodConsumed, "; Left:", food)
+
+        //console.log("eaten:", food, `${this.energy}/${this.energyConsumption()}; ${this.fat}/${this.fatCapacity()}`)
+        return food
     }
 
     divide() {
@@ -116,6 +134,7 @@ class Creature {
         const mutations = this.mutateGenes(newGenes)
 
         let child = new Creature(newGenes, this.x, this.y)
+        child.generation = this.generation + 1
         //console.log("creature", this, "divided!", child)
         if (mutations.mutatedGenes.length)
             console.log("New creature mutated in:", mutations.mutatedGenes.join(", "))
@@ -169,12 +188,18 @@ class Creature {
 
     toString() {
         let description = ``
+        description += `⌛: ${this.age}/${this.lifespan()}`
         description += `💚: ${this.energy}/${this.energyConsumption()}`
         description += `💛: ${this.fat}/${this.fatCapacity()}`
+        description += `🐘: ${this.mass()}`
+        description += `🦶: ${this.speed()}`
+
+        description += ` GENES:`
         for (let gene of Object.values(this.genes))
             description += `${gene.icon}: ${gene.power}`
-        description += `      ⌛: ${this.age}/${this.lifespan()}`
         
+        description += ` G${this.generation}`
+
         return description
     }
 }
