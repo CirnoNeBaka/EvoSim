@@ -24,7 +24,7 @@ class Gene {
             } else {
                 this.power -= 1
                 if (this.isEssential)
-                    this.power = GENE_POWER_MIN
+                    this.power = Math.max(GENE_POWER_MIN, this.power)
             }
             return true
         }
@@ -71,6 +71,13 @@ const GENE_FAT = {
     icon: '💛',
 }
 
+const GENE_REGENERATION = {
+    id: 'REGENERATION',
+    isEssential: false,
+    energyCost: 1,
+    icon: '💚',
+}
+
 const GENE_CARNIVORE = {
     id: 'CARNIVORE',
     isEssential: false,
@@ -101,6 +108,7 @@ const ESSENTIAL_GENES = [
 
 const NON_ESSENTIAL_GENES = [
     GENE_FAT,
+    GENE_REGENERATION,
 ]
 
 const FEEDING_GENES = [

@@ -17,22 +17,26 @@ class Game {
     generateNewCreatures() {
         const creatureCount = this.world.creatures.length
         this.spawnWorms(Math.max(BASE_CREATURE_COUNT - creatureCount, 0))
+        if (RNG.roll01(0.05))
+            this.spawnWorms(1)
     }
 
     spawnWorms(count) {
         for (let i = 0; i < count; ++i) {
             const worm = createBasicCreature()
             
-            worm.x = RNG.rollInt(0, this.world.width - 1) 
-            worm.y = RNG.rollInt(0, this.world.height - 1)
+            const x = RNG.rollInt(0, this.world.width - 1)
+            const y = RNG.rollInt(0, this.world.height - 1)
+            worm.x = x
+            worm.y = y
 
-            this.world.creatures.push(worm)
-            console.log(`Worm spawned!`, worm)
+            this.world.addCreature(worm)
+            //console.log(`Worm spawned!`, worm)
         }
     }
 
     processTurn() {
-        console.log("===BEGIN TURN===")
+        //console.log("===BEGIN TURN===")
         this.world.forEachTile((tile) => { tile.refresh(); })
         this.generateNewCreatures()
 
@@ -43,37 +47,48 @@ class Game {
         let speedSortedCreatures = this.world.creatures.sort((c1, c2) => { return c2.speed() - c1.speed() })
         for (let creature of speedSortedCreatures) {
             let currentTile = this.world.tile(creature.x, creature.y)
-            let adjacentTiles = this.world.adjacentTiles(creature.x, creature.y)
-            creature.move(currentTile, adjacentTiles, this.world)
+            let adjacentTiles = this.world.adjacentTiles(creature.x, creature.y).filter(tile => {
+                return tile.creatureMass + creature.mass() <= tile.creatureMassCapacity
+            })
+
+            let newTile = creature.move(currentTile, adjacentTiles, this.world)
+            this.world.moveCreature(creature, currentTile, newTile)
         }
 
         this.feedCreatures()
         this.procreate()
         this.world.forEachCreature((creature) => { creature.age++ })
-        console.log("===END TURN===")
+        //console.log("===END TURN===")
     }
 
     testSurvival(creature) {
+        creature.hp = Math.min(creature.maxHP(), creature.hp + creature.regeneration())
+
         if (creature.energy >= creature.energyConsumption())
             return true
 
         const energyDeficit = Math.max(0, creature.energyConsumption() - creature.energy)
-        const survived = RNG.testDC(0, energyDeficit, creature.energyConsumption())
+        creature.hp -= energyDeficit
+        const survived = creature.hp > 0
+        //const hpDeficit = creature.maxHP() - creature.hp
+        //const survived = RNG.testDC(0, hpDeficit, creature.maxHP())
         return survived
     }
 
     testSurvivalOfEveryone() {
         let corpses = []
-        for (let i = 0; i < this.world.creatures.length; ++i) {
-            let creature = this.world.creatures[i]
+        for (let creature of this.world.creatures) {
             const survivedHunger = this.testSurvival(creature)
             const survivedOldAge = creature.age < creature.lifespan()
             const survived = survivedHunger && survivedOldAge
             if (!survived) {
-                const reason = !survivedHunger ? "hunger" : "old age"
-                console.log(`Creature at (${creature.x}, ${creature.y}) died from ${reason} with ${creature.energy}/${creature.energyConsumption()} energy`)
+//                const reason = !survivedHunger ? "hunger" : "old age"
+//                 console.log(`Creature at (${creature.x}, ${creature.y}) died from ${reason} \
+// with ${creature.energy}/${creature.energyConsumption()} energy \
+// and ${creature.hp}/${creature.maxHP()} hp`)
                 creature.kill()
                 let tile = this.world.tile(creature.x, creature.y)
+                tile.creatureMass -= creature.mass()
                 tile.food.meat += creature.mass()
                 corpses.push(creature)
             }
@@ -142,13 +157,14 @@ class Game {
     procreate() {
         let newborns = []
         this.world.forEachCreature((creature) => {
+            let tile = this.world.tile(creature.x, creature.y)
             if (RNG.roll01(creature.divideChance())) {
                 let child = creature.divide()
                 newborns.push(child)
             }
         })
         for (let c of newborns)
-            this.world.creatures.push(c)
+            this.world.addCreature(c)
     }
 
     cleanupDead(corpses) {

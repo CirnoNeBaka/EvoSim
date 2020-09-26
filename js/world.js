@@ -23,6 +23,32 @@ class World {
         return this.creatures.filter((creature) => { return creature.x === x && creature.y === y })
     }
 
+    addCreature(creature) {
+        let tile = this.tile(creature.x, creature.y)
+        if (tile.creatureMass + creature.mass() > tile.creatureMassCapacity)
+            return false;
+        tile.creatureMass += creature.mass()
+        this.assertCreatureMass(tile)
+        this.creatures.push(creature)
+        return true
+    }
+
+    moveCreature(creature, fromTile, toTile) {
+        if (fromTile)
+            fromTile.creatureMass -= creature.mass()
+        if (toTile) {
+            creature.x = toTile.x
+            creature.y = toTile.y
+            toTile.creatureMass += creature.mass()
+            this.assertCreatureMass(toTile)
+        }
+    }
+
+    assertCreatureMass(tile) {
+        if (tile.creatureMass > tile.creatureMassCapacity)
+            console.warn("CHEATER:", tile)
+    }
+
     adjacentTiles(x, y) {
         const left  = (x > 0) ? (x - 1) : (this.width - 1)
         const right = (x < this.width - 1) ? (x + 1) : 0

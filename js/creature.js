@@ -24,8 +24,6 @@ function createBasicCreature() {
     genes[feedingGene.id] = new Gene(feedingGene)
 
     let creature = new Creature(genes)
-    creature.energy = creature.energyConsumption()
-    creature.hp = creature.mass()
     return creature
 }
 
@@ -34,7 +32,7 @@ class Creature {
         this.x = x
         this.y = y
         this.genes = cloneGenes(genes)
-        this.hp = this.mass()
+        this.hp = this.maxHP()
         this.energy = this.energyConsumption()
         this.fat = 0
         this.age = 0
@@ -55,8 +53,18 @@ class Creature {
         return this.genePower('MASS') * 10 + this.genePower('FAT') * 5
     }
 
+    maxHP() {
+        return this.genePower('MASS') * 25
+    }
+
+    regeneration() {
+        const canRegenerate = this.energy >= this.energyConsumption()
+        const rate = canRegenerate ? (this.genePower('REGENERATION') * 10) : 0
+        return rate
+    }
+
     speed() {
-        return Math.floor(Math.max(1, this.genes.SPEED.power * 10 - this.mass() / 2))
+        return Math.floor(Math.max(1, this.genePower('SPEED') * 10 - this.mass() / 2))
     }
 
     energyConsumption() {
@@ -66,17 +74,21 @@ class Creature {
     fatCapacity() {
         if (!this.hasGene('FAT'))
             return 0
-        return this.genes.FAT.power * 10
+        return this.genePower('FAT') * 10
     }
 
     divideChance() {
         if (this.age <= 1)
             return 0 // to prevent exponential zerg rush
-        return this.genes.FERTILITY.power / 10.0
+        let chance = this.genePower('FERTILITY') / 10.0
+        const energyDeficit = (this.energyConsumption() - this.energy) / this.energyConsumption()
+        chance = chance * Math.pow(1.0 - energyDeficit, 2)
+        //console.log("Divide chance:", chance.toFixed(2), "deficit:", energyDeficit.toFixed(2))
+        return chance
     }
 
     lifespan() {
-        return this.genes.LONGEVITY.power * 10
+        return this.genePower('LONGEVITY') * 10
     }
 
     move(currentTile, availableTiles, world) {
@@ -92,8 +104,8 @@ class Creature {
         let bestTile = tiles[tiles.length - 1]
         this.x = bestTile.x
         this.y = bestTile.y
-        if (bestTile != currentTile)
-            console.log("Creature", this, "moved to", bestTile.x, bestTile.y)
+        // if (bestTile != currentTile)
+        //     console.log("Creature", this, "moved to", bestTile.x, bestTile.y)
         return bestTile
     }
 
@@ -112,6 +124,8 @@ class Creature {
             return acc + (this.canEat(type) ? tile.food[type] : 0)
         }, 0)
         score /= Math.max(1, world.creaturesAt(tile.x, tile.y).length)
+        if (tile.x !== this.x && tile.y !== this.y)
+            score++
         return score
     }
 
@@ -213,12 +227,12 @@ class Creature {
     toString() {
         let description = ``
         description += ` ⌛${this.age}/${this.lifespan()}`
-        description += ` 💚${this.energy}/${this.energyConsumption()}`
+        description += ` 💖${this.hp}/${this.maxHP()}`
+        description += ` 💙${this.energy}/${this.energyConsumption()}`
         description += ` 💛${this.fat}/${this.fatCapacity()}`
         description += ` 🐘${this.mass()}`
         description += ` 🦶${this.speed()}`
 
-        description += ` GENES:`
         for (let gene of Object.values(this.genes))
             description += ` ${gene.icon}${gene.power}`
         

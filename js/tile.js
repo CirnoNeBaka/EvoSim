@@ -24,6 +24,7 @@ class Tile {
             this[key] = stats[key]
 
         this.food = new Food()
+        this.creatureMass = 0
     }
 
     refresh() {
@@ -40,15 +41,15 @@ class Tile {
 
 const TILE_GRASSLAND = {
     id: 'grassland',
-    plantFoodCapacity: 100,
-    creatureMassCapacity: 100,
+    plantFoodCapacity: 500,
+    creatureMassCapacity: 200,
     flags: []
 }
 
 const TILE_DESERT = {
     id: 'desert',
     plantFoodCapacity: 10,
-    creatureMassCapacity: 100,
+    creatureMassCapacity: 200,
     flags: []
 }
 

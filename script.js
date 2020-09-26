@@ -48,11 +48,12 @@ function renderTile(tile) {
         return;
 
     let creatures = gameEngine.world.creaturesAt(tile.x, tile.y)
+    const creaturesMass = creatures.reduce((sum, c) => { return sum + c.mass() }, 0 )
 
-    tileView.innerText += `x: ${tile.x} y: ${tile.y}\n`
-    tileView.innerText += `🌱: ${tile.food.plant}/${tile.plantFoodCapacity}\t`
-    tileView.innerText += `🍖: ${tile.food.meat}\t`
-    tileView.innerText += `🦴: ${tile.food.carrion}\n`
+    tileView.innerText += `x:${tile.x} y:${tile.y} 🐘${creaturesMass}/${tile.creatureMassCapacity}\n`
+    tileView.innerText += ` 🌱${tile.food.plant}/${tile.plantFoodCapacity}\t`
+    tileView.innerText += ` 🍖${tile.food.meat}\t`
+    tileView.innerText += ` 🦴${tile.food.carrion}\n`
 
     for (let i in creatures) {
         let creature = creatures[i]
@@ -66,6 +67,32 @@ function onSimulateOneTurn() {
     renderTile(currentTile)
 }
 
+let isSimulationRunning = false
+let cancelHandle = null
+
+function onToggleSimulation() {
+    isSimulationRunning = !isSimulationRunning
+    let runButton = document.getElementById('runSimulationButton')
+    runButton.innerText = isSimulationRunning ? 'Pause simulation' : 'Run simulation'
+
+    let stepButton = document.getElementById('stepSimulationButton')
+    if (isSimulationRunning)
+        stepButton.setAttribute('disabled', isSimulationRunning)
+    else
+        stepButton.removeAttribute('disabled')
+
+    if (isSimulationRunning) {
+        const interval = 250
+        let exec = () => {
+            onSimulateOneTurn()
+            cancelHandle = setTimeout(exec, interval)
+        }
+        exec()
+    } else {
+        clearTimeout(cancelHandle)
+    }
+}
+
 function onClickTile(x, y) {
     let tile = gameEngine.world.tile(x, y)
     renderTile(tile)
@@ -74,10 +101,12 @@ function onClickTile(x, y) {
 
 document.onSimulateOneTurn = onSimulateOneTurn
 document.onClickTile = onClickTile
+document.onToggleSimulation = onToggleSimulation
 
 document.onkeydown = function(event) {
     event = event || window.event;
     if (event.keyCode === ' '.charCodeAt(0)) {
-        onSimulateOneTurn()
+        if (!isSimulationRunning)
+            onSimulateOneTurn()
     }
 };
