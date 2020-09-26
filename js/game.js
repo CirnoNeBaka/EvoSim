@@ -44,7 +44,7 @@ class Game {
         for (let creature of speedSortedCreatures) {
             let currentTile = this.world.tile(creature.x, creature.y)
             let adjacentTiles = this.world.adjacentTiles(creature.x, creature.y)
-            creature.move(currentTile, adjacentTiles)
+            creature.move(currentTile, adjacentTiles, this.world)
         }
 
         this.feedCreatures()
@@ -74,7 +74,7 @@ class Game {
                 console.log(`Creature at (${creature.x}, ${creature.y}) died from ${reason} with ${creature.energy}/${creature.energyConsumption()} energy`)
                 creature.kill()
                 let tile = this.world.tile(creature.x, creature.y)
-                tile.food.carrion += creature.mass()
+                tile.food.meat += creature.mass()
                 corpses.push(creature)
             }
         }

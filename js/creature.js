@@ -2,7 +2,7 @@
 
 import './genes.js'
 import * as RNG from './rng.js'
-import { Gene, ESSENTIAL_GENES, NON_ESSENTIAL_GENES } from './genes.js'
+import { Gene, ESSENTIAL_GENES, NON_ESSENTIAL_GENES, FEEDING_GENES, requiredGene } from './genes.js'
 
 function cloneGenes(genes) {
     let result = {}
@@ -14,13 +14,16 @@ function cloneGenes(genes) {
 }
 
 function createBasicCreature() {
-    const essentialGeneMap = ESSENTIAL_GENES.reduce((acc, gene) => {
+    let genes = ESSENTIAL_GENES.reduce((acc, gene) => {
         let geneInstance = new Gene(gene)
         acc[gene.id] = geneInstance
         return acc
     }, {})
 
-    let creature = new Creature(essentialGeneMap)
+    const feedingGene = RNG.randomElement(FEEDING_GENES)
+    genes[feedingGene.id] = new Gene(feedingGene)
+
+    let creature = new Creature(genes)
     creature.energy = creature.energyConsumption()
     creature.hp = creature.mass()
     return creature
@@ -76,22 +79,21 @@ class Creature {
         return this.genes.LONGEVITY.power * 10
     }
 
-    move(currentTile, availableTiles) {
+    move(currentTile, availableTiles, world) {
         if (!availableTiles.length)
-            return currentTile;
-        // everyone is a lazy herbivore yet
-        if (currentTile.food.plant >= this.energyConsumption())
             return currentTile;
 
         let tiles = availableTiles.concat(currentTile)
         tiles.sort((t1, t2) => {
-            const score1 = t1.food.plant
-            const score2 = t2.food.plant
+            const score1 = this.tileFoodAttractiveness(t1, world)
+            const score2 = this.tileFoodAttractiveness(t2, world)
             return score1 - score2
         })
         let bestTile = tiles[tiles.length - 1]
         this.x = bestTile.x
         this.y = bestTile.y
+        if (bestTile != currentTile)
+            console.log("Creature", this, "moved to", bestTile.x, bestTile.y)
         return bestTile
     }
 
@@ -101,17 +103,35 @@ class Creature {
         return needEnergy || needFat
     }
 
-    feed(food) {
-        // everyone is a herbivore yet
+    canEat(foodType) {
+        return requiredGene(foodType).id in this.genes
+    }
 
+    tileFoodAttractiveness(tile, world) {
+        let score = tile.food.types().reduce((acc, type) => {
+            return acc + (this.canEat(type) ? tile.food[type] : 0)
+        }, 0)
+        score /= Math.max(1, world.creaturesAt(tile.x, tile.y).length)
+        return score
+    }
+
+    feed(food) {
         //console.log("feed:", food, `${this.energy}/${this.energyConsumption()}; ${this.fat}/${this.fatCapacity()}`)
 
-        if (this.energy < this.energyConsumption()) {
-            const energyDeficit = this.energyConsumption() - this.energy
-            const plantFoodConsumed = Math.min(food.plant, energyDeficit)
-            this.energy += plantFoodConsumed
-            food.plant -= plantFoodConsumed
+        let consume = (deposit, limit) => {
+            let energyDeficit = limit - this[deposit]
+            for (let type of food.types()) {
+                if (this.canEat(type)) {
+                    const foodConsumed = Math.min(food[type], energyDeficit)
+                    this[deposit] += foodConsumed
+                    food[type] -= foodConsumed
+                    energyDeficit -= foodConsumed
+                }
+            }
         }
+
+        if (this.energy < this.energyConsumption())
+            consume('energy', this.energyConsumption())
 
         if (this.hasGene('FAT')) {
             const energyDeficit = this.energyConsumption() - this.energy
@@ -119,10 +139,7 @@ class Creature {
             this.energy += energyGainedFromFat
             this.fat -= energyGainedFromFat
 
-            const freeFatCapacity = this.fatCapacity() - this.fat
-            const addEnergyToFat = Math.min(food.plant, freeFatCapacity)
-            this.fat += addEnergyToFat
-            food.plant -= addEnergyToFat
+            consume('fat', this.fatCapacity())
         }
 
         //console.log("eaten:", food, `${this.energy}/${this.energyConsumption()}; ${this.fat}/${this.fatCapacity()}`)
@@ -136,12 +153,12 @@ class Creature {
         let child = new Creature(newGenes, this.x, this.y)
         child.generation = this.generation + 1
         //console.log("creature", this, "divided!", child)
-        if (mutations.mutatedGenes.length)
-            console.log("New creature mutated in:", mutations.mutatedGenes.join(", "))
-        if (mutations.lostGenes.length)
-            console.log("New creature lost genes:", mutations.lostGenes.join(", "))
-        if (mutations.gainedGenes.length)
-            console.log("New creature gained genes:", mutations.gainedGenes.join(", "))
+        // if (mutations.mutatedGenes.length)
+        //     console.log("New creature mutated in:", mutations.mutatedGenes.join(", "))
+        // if (mutations.lostGenes.length)
+        //     console.log("New creature lost genes:", mutations.lostGenes.join(", "))
+        // if (mutations.gainedGenes.length)
+        //     console.log("New creature gained genes:", mutations.gainedGenes.join(", "))
         return child
     }
 
@@ -175,6 +192,13 @@ class Creature {
             }
         }
 
+        // ensure creature has at least one feeding gene
+        if (!FEEDING_GENES.some(gene => gene.ID in genes)) {
+            let feedingGene = RNG.randomElement(FEEDING_GENES)
+            genes[feedingGene.id] = new Gene(feedingGene)
+            gainedGenes.push(feedingGene.id)
+        }
+
         return {
             mutatedGenes : mutatedGenes,
             gainedGenes: gainedGenes,
@@ -188,15 +212,15 @@ class Creature {
 
     toString() {
         let description = ``
-        description += `⌛: ${this.age}/${this.lifespan()}`
-        description += `💚: ${this.energy}/${this.energyConsumption()}`
-        description += `💛: ${this.fat}/${this.fatCapacity()}`
-        description += `🐘: ${this.mass()}`
-        description += `🦶: ${this.speed()}`
+        description += ` ⌛${this.age}/${this.lifespan()}`
+        description += ` 💚${this.energy}/${this.energyConsumption()}`
+        description += ` 💛${this.fat}/${this.fatCapacity()}`
+        description += ` 🐘${this.mass()}`
+        description += ` 🦶${this.speed()}`
 
         description += ` GENES:`
         for (let gene of Object.values(this.genes))
-            description += `${gene.icon}: ${gene.power}`
+            description += ` ${gene.icon}${gene.power}`
         
         description += ` G${this.generation}`
 

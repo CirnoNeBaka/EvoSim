@@ -28,8 +28,9 @@ class Tile {
 
     refresh() {
         this.regrowPlantFood()
+        this.food.carrion = Math.floor(this.food.carrion * 0.5)
+        this.food.carrion += this.food.meat
         this.food.meat = 0
-        this.food.carrion = 0
     }
 
     regrowPlantFood() {
@@ -46,7 +47,7 @@ const TILE_GRASSLAND = {
 
 const TILE_DESERT = {
     id: 'desert',
-    plantFoodCapacity: 5,
+    plantFoodCapacity: 10,
     creatureMassCapacity: 100,
     flags: []
 }

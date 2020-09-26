@@ -68,10 +68,16 @@ function onSimulateOneTurn() {
 
 function onClickTile(x, y) {
     let tile = gameEngine.world.tile(x, y)
-    console.log(tile, gameEngine.world.creaturesAt(x, y))
     renderTile(tile)
     currentTile = tile
 }
 
 document.onSimulateOneTurn = onSimulateOneTurn
 document.onClickTile = onClickTile
+
+document.onkeydown = function(event) {
+    event = event || window.event;
+    if (event.keyCode === ' '.charCodeAt(0)) {
+        onSimulateOneTurn()
+    }
+};

@@ -71,6 +71,27 @@ const GENE_FAT = {
     icon: '💛',
 }
 
+const GENE_CARNIVORE = {
+    id: 'CARNIVORE',
+    isEssential: false,
+    energyCost: 1,
+    icon: '🍖',
+}
+
+const GENE_HERBIVORE = {
+    id: 'HERBIVORE',
+    isEssential: false,
+    energyCost: 1,
+    icon: '🌿',
+}
+
+const GENE_SCAVENGER = {
+    id: 'SCAVENGER',
+    isEssential: false,
+    energyCost: 1,
+    icon: '💀',
+}
+
 const ESSENTIAL_GENES = [
     GENE_MASS,
     GENE_SPEED,
@@ -79,13 +100,27 @@ const ESSENTIAL_GENES = [
 ]
 
 const NON_ESSENTIAL_GENES = [
-    GENE_FAT
+    GENE_FAT,
 ]
+
+const FEEDING_GENES = [
+    GENE_HERBIVORE,
+    GENE_CARNIVORE,
+    GENE_SCAVENGER,
+]
+
+export function requiredGene(foodType) {
+    if (foodType === 'plant') return GENE_HERBIVORE
+    else if (foodType === 'meat') return GENE_CARNIVORE
+    else if (foodType === 'carrion') return GENE_SCAVENGER
+    else return null
+}
 
 export {
     Gene,
     ESSENTIAL_GENES,
     NON_ESSENTIAL_GENES,
+    FEEDING_GENES,
 
     GENE_MASS,
     GENE_SPEED,
@@ -93,5 +128,9 @@ export {
     GENE_FERTILITY,
 
     GENE_FAT,
+
+    GENE_HERBIVORE,
+    GENE_CARNIVORE,
+    GENE_SCAVENGER,
 }
 
