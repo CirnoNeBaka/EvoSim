@@ -31,14 +31,36 @@ class Creature {
     constructor(genes, x = 0, y = 0) {
         this.x = x
         this.y = y
+        
         this.genes = cloneGenes(genes)
+        this.createBasicStats()
+
+        this.alive = true
         this.hp = this.maxHP()
         this.energy = this.energyConsumption()
         this.fat = 0
         this.age = 0
-        this.generation = 0
-        this.alive = true
-        this.foodEfficiency = this.generateFoodEfficiency()
+        this.generation = 0        
+    }
+
+    // basic stats depend only on genes and remain constant during a creature's life
+    createBasicStats() {
+        let stats = {}
+        
+        stats.foodEfficiency = this.generateFoodEfficiency()
+        stats.mass = this.genePower('MASS') * 10 + this.genePower('FAT') * 5
+        stats.maxHP = this.genePower('MASS') * 25
+        stats.speed = Math.floor(Math.max(1, this.genePower('SPEED') * 10 - stats.mass / 2))
+        stats.regeneration = this.genePower('REGENERATION') * 10
+        stats.energyConsumption = stats.mass + Object.values(this.genes).reduce((acc, gene) => { return acc + gene.power * gene.energyCost }, 0)
+        stats.fatCapacity = this.hasGene('FAT') ? this.genePower('FAT') * 25 : 0
+        stats.lifespan = this.genePower('LONGEVITY') * 10
+        stats.divideChance = this.genePower('FERTILITY') / 10.0
+        
+        this.basicStats = stats
+        for (let key of Object.keys(stats))
+            Object.defineProperty(this.basicStats, key, { writable: false })
+        Object.defineProperty(this, 'basicStats', { writable: false })
     }
 
     generateFoodEfficiency() {
@@ -56,31 +78,29 @@ class Creature {
     }
 
     mass() {
-        return this.genePower('MASS') * 10 + this.genePower('FAT') * 5
+        return this.basicStats.mass
     }
 
     maxHP() {
-        return this.genePower('MASS') * 25
+        return this.basicStats.maxHP
     }
 
     regeneration() {
         const canRegenerate = this.energy >= this.energyConsumption()
-        const rate = canRegenerate ? (this.genePower('REGENERATION') * 10) : 0
+        const rate = canRegenerate ? this.basicStats.regeneration : 0
         return rate
     }
 
     speed() {
-        return Math.floor(Math.max(1, this.genePower('SPEED') * 10 - this.mass() / 2))
+        return this.basicStats.speed
     }
 
     energyConsumption() {
-        return this.mass() + Object.values(this.genes).reduce((acc, gene) => { return acc + gene.power * gene.energyCost }, 0)
+        return this.basicStats.energyConsumption
     }
 
     fatCapacity() {
-        if (!this.hasGene('FAT'))
-            return 0
-        return this.genePower('FAT') * 25
+        return this.basicStats.fatCapacity
     }
 
     divideChance() {
@@ -88,7 +108,7 @@ class Creature {
             return 0 // to prevent exponential zerg rush
         if (this.energy < this.energyConsumption())
             return 0
-        let chance = this.genePower('FERTILITY') / 10.0
+        let chance = this.basicStats.divideChance
         const energyDeficit = (this.energyConsumption() - this.energy) / this.energyConsumption()
         chance = chance * Math.pow(1.0 - energyDeficit, 2)
         //console.log("Divide chance:", chance.toFixed(2), "deficit:", energyDeficit.toFixed(2))
@@ -96,7 +116,7 @@ class Creature {
     }
 
     lifespan() {
-        return this.genePower('LONGEVITY') * 10
+        return this.basicStats.lifespan
     }
 
     move(currentTile, availableTiles, world) {
@@ -138,7 +158,7 @@ class Creature {
     }
 
     energyGain(foodType, foodAmount) {
-        return Math.round(this.foodEfficiency[foodType] * foodAmount)
+        return Math.round(this.basicStats.foodEfficiency[foodType] * foodAmount)
     }
 
     feed(food) {
