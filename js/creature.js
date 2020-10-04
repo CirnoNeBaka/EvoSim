@@ -3,6 +3,8 @@
 import './genes.js'
 import * as RNG from './rng.js'
 import { Gene, ESSENTIAL_GENES, NON_ESSENTIAL_GENES, FEEDING_GENES, requiredGene } from './genes.js'
+import { Damage } from './fight.js'
+import * as Fight from './fight.js'
 
 function cloneGenes(genes) {
     let result = {}
@@ -56,6 +58,15 @@ class Creature {
         stats.fatCapacity = this.hasGene('FAT') ? this.genePower('FAT') * 25 : 0
         stats.lifespan = this.genePower('LONGEVITY') * 10
         stats.divideChance = this.genePower('FERTILITY') / 10.0
+
+        try {
+        stats.attack      = Object.values(this.genes).reduce((acc, gene) => { acc.add(gene.getAttack());      return acc }, new Fight.Damage())
+        stats.defence     = Object.values(this.genes).reduce((acc, gene) => { acc.add(gene.getDefence());     return acc }, new Fight.Damage())
+        stats.retribution = Object.values(this.genes).reduce((acc, gene) => { acc.add(gene.getRetribution()); return acc }, new Fight.Damage())
+        } catch (e) {
+            console.warn(this.genes)
+            throw e
+        }
         
         this.basicStats = stats
         for (let key of Object.keys(stats))
@@ -117,6 +128,18 @@ class Creature {
 
     lifespan() {
         return this.basicStats.lifespan
+    }
+
+    attack() {
+        return this.basicStats.attack
+    }
+
+    defence() {
+        return this.basicStats.defence
+    }
+
+    retribution() {
+        return this.basicStats.retribution
     }
 
     move(currentTile, availableTiles, world) {

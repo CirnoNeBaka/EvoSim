@@ -1,6 +1,6 @@
 'use strict'
 
-import * as RNG from './rng'
+import * as RNG from './rng.js'
 
 const DMG_PHYSICAL = Symbol('PHYSICAL')
 const DMG_FIRE = Symbol('FIRE')
@@ -15,21 +15,43 @@ const DAMAGE_TYPES = [
 ]
 
 class Damage {
-    constructor() {
+    constructor(data) {
         for (let type of DAMAGE_TYPES)
-            this[type] = 0
+            this[type] = data ? data[type] : 0
+    }
+
+    add(dmg) {
+        let result = Object.assign(new Damage(), this)
+        for (let type of DAMAGE_TYPES) {
+            result[type] += dmg[type]
+        }
+        return result
+    }
+
+    subtract(dmg) {
+        let result = Object.assign(new Damage(), this)
+        for (let type of DAMAGE_TYPES) {
+            result[type] = Math.max(0, result[type] - dmg[type])
+        }
+        return result
     }
 }
 
-class Defence {
-    constructor() {
-        for (let type of DAMAGE_TYPES)
-            this[type] = 0
+class Hunt {
+    constructor(predators, prey) {
+        this.predators = Array.isArray(predators) ? predators : [ predators ]
+        this.prey = Array.isArray(prey) ? prey : [ prey ]
     }
 }
 
 export {
     Damage,
-    Defence,
-    DAMAGE_TYPES
+    DAMAGE_TYPES,
+
+    DMG_PHYSICAL,
+    DMG_FIRE,
+    DMG_COLD,
+    DMG_ACID,
+
+    Hunt
 }
