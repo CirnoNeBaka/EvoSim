@@ -91,7 +91,7 @@ class Creature {
         let chance = this.genePower('FERTILITY') / 10.0
         const energyDeficit = (this.energyConsumption() - this.energy) / this.energyConsumption()
         chance = chance * Math.pow(1.0 - energyDeficit, 2)
-        console.log("Divide chance:", chance.toFixed(2), "deficit:", energyDeficit.toFixed(2))
+        //console.log("Divide chance:", chance.toFixed(2), "deficit:", energyDeficit.toFixed(2))
         return chance
     }
 
@@ -150,7 +150,7 @@ class Creature {
                 if (this.canEat(type)) {
                     const foodConsumed = Math.min(food[type], energyDeficit)
                     const energyGained = this.energyGain(type, foodConsumed)
-                    //console.log(`Consumed ${foodConsumed} ${type} as ${energyGained} energy`)
+                    //console.log(`Consumed ${foodConsumed} ${type.toString()} as ${energyGained} energy`, this.foodEfficiency)
                     food[type] -= foodConsumed
                     this[deposit] += energyGained
                     energyDeficit -= energyGained

@@ -1,17 +1,20 @@
 'use strict'
 
-const FOOD_TYPES = [ 'plant', 'meat', 'carrion' ]
+import * as Food from './food.js'
 
-class Food {
+// percentage of carrion that carries over to the next turn
+const CARRION_DECAY_RATE = 0.8
+
+class FoodStorage {
     constructor(amounts) {
-        for (let type of FOOD_TYPES) {
+        for (let type of Food.TYPES) {
             const amount = (amounts && amounts.hasOwnProperty(type)) ? amounts[type] : 0
             this[type] = amount
         }
     }
 
     types() {
-        return Object.keys(this)
+        return Food.TYPES
     }
 }
 
@@ -20,22 +23,22 @@ class Tile {
         this.x = 0
         this.y = 0
 
-        for (var key in stats)
+        for (let key of Object.keys(stats))
             this[key] = stats[key]
 
-        this.food = new Food()
+        this.food = new FoodStorage()
         this.creatureMass = 0
     }
 
     refresh() {
         this.regrowPlantFood()
-        this.food.carrion = Math.floor(this.food.carrion * 0.8)
-        this.food.carrion += this.food.meat
-        this.food.meat = 0
+        this.food[Food.CARRION] = Math.floor(this.food[Food.CARRION] * CARRION_DECAY_RATE)
+        this.food[Food.CARRION] += this.food[Food.MEAT]
+        this.food[Food.MEAT] = 0
     }
 
     regrowPlantFood() {
-        this.food.plant = this.plantFoodCapacity
+        this.food[Food.PLANT] = this.plantFoodCapacity
     }
 }
 
@@ -61,7 +64,7 @@ const TILE_SEA = {
 }
 
 export {
-    Food,
+    FoodStorage,
     Tile,
 
     TILE_GRASSLAND,

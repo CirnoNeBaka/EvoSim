@@ -1,11 +1,12 @@
 'use strict'
 
 import * as RNG from './rng.js'
+import * as Food from './food.js'
 import './world.js'
 import './tile.js'
 import './creature.js'
 import { createBasicCreature } from './creature.js'
-import { Food } from './tile.js'
+import { FoodStorage } from './tile.js'
 
 const BASE_CREATURE_COUNT = 10
 
@@ -89,7 +90,7 @@ class Game {
                 creature.kill()
                 let tile = this.world.tile(creature.x, creature.y)
                 tile.creatureMass -= creature.mass()
-                tile.food.carrion += creature.mass()
+                tile.food[Food.CARRION] += creature.mass()
                 corpses.push(creature)
             }
         }
@@ -115,10 +116,10 @@ class Game {
             //console.log("FEEDING STARTS:", hungryCreatures, creatures)
             while (hungryCreatures.length) {
                 const oldHungryCreaturesCount = hungryCreatures.length
-                const guaranteedFood = new Food()
-                const contestedFood = new Food()
+                const guaranteedFood = new FoodStorage()
+                const contestedFood = new FoodStorage()
 
-                for (let type of tile.food.types()) {
+                for (let type of Food.TYPES) {
                     const totalFood = tile.food[type]
                     const guaranteedAmount = Math.floor(totalFood / hungryCreatures.length)
                     guaranteedFood[type] = guaranteedAmount
@@ -129,7 +130,7 @@ class Game {
                 tile.food = contestedFood
                 let satiatedCreatures = []
                 for (let creature of hungryCreatures) {
-                    let foodCopy = new Food(guaranteedFood)
+                    let foodCopy = new FoodStorage(guaranteedFood)
                     let remains = creature.feed(foodCopy)
                     for (let type of tile.food.types())
                         tile.food[type] += remains[type]

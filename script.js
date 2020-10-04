@@ -2,6 +2,7 @@
 
 import { Game } from './js/game.js'
 import { World } from './js/world.js'
+import * as Food from './js/food.js'
 
 let world = new World()
 world.generateTiles()
@@ -48,14 +49,12 @@ function renderTile(tile) {
     const creaturesMass = creatures.reduce((sum, c) => { return sum + c.mass() }, 0 )
 
     tileView.innerText += `x:${tile.x} y:${tile.y} 🐘${creaturesMass}/${tile.creatureMassCapacity}\n`
-    tileView.innerText += ` 🌱${tile.food.plant}/${tile.plantFoodCapacity}\t`
-    tileView.innerText += ` 🍖${tile.food.meat}\t`
-    tileView.innerText += ` 🦴${tile.food.carrion}\n`
+    tileView.innerText += ` 🌱${tile.food[Food.PLANT]}/${tile.plantFoodCapacity}\t`
+    tileView.innerText += ` 🍖${tile.food[Food.MEAT]}\t`
+    tileView.innerText += ` 🦴${tile.food[Food.CARRION]}\n`
 
-    for (let i in creatures) {
-        let creature = creatures[i]
+    for (let creature of creatures)
         tileView.innerText += creature.toString() + "\n"
-    }
 }
 
 function onSimulateOneTurn() {

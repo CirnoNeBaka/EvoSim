@@ -1,6 +1,7 @@
 'use strict'
 
 import * as RNG from './rng.js'
+import * as Food from './food.js'
 
 const GENE_POWER_MIN = 1
 const GENE_POWER_MAX = 10
@@ -83,7 +84,7 @@ const GENE_CARNIVORE = {
     isEssential: false,
     energyCost: 0,
     icon: '🍖',
-    foodType: 'meat',
+    foodType: Food.MEAT
 }
 
 const GENE_HERBIVORE = {
@@ -91,15 +92,15 @@ const GENE_HERBIVORE = {
     isEssential: false,
     energyCost: 0,
     icon: '🌿',
-    foodType: 'plant',
+    foodType: Food.PLANT,
 }
 
 const GENE_SCAVENGER = {
     id: 'SCAVENGER',
     isEssential: false,
     energyCost: 0,
-    icon: '💀',
-    foodType: 'carrion',
+    icon: '🦴',
+    foodType: Food.CARRION,
 }
 
 const ESSENTIAL_GENES = [
@@ -125,10 +126,10 @@ const FEEDING_GENES = [
 ]
 
 export function requiredGene(foodType) {
-    if (foodType === 'plant') return GENE_HERBIVORE
-    else if (foodType === 'meat') return GENE_CARNIVORE
-    else if (foodType === 'carrion') return GENE_SCAVENGER
-    else return null
+    for (let gene of FEEDING_GENES)
+        if (gene.foodType === foodType)
+            return gene
+    return null
 }
 
 export {
