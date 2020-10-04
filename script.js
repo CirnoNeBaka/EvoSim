@@ -2,65 +2,48 @@
 
 import { Game } from './js/game.js'
 import { World } from './js/world.js'
-import * as Food from './js/food.js'
+
+import { WorldView } from './js/view/worldView.js'
+import { TileView } from './js/view/tileView.js'
+import { FullCreatureView } from './js/view/creatureView.js'
 
 let world = new World()
 world.generateTiles()
 
 let gameEngine = new Game(world)
 let currentTile = null
+let currentCreature = null
+
+let worldView = new WorldView(world)
+let tileView = new TileView(currentTile, world)
+let creatureView = new FullCreatureView(currentCreature)
 
 renderWorld(world)
 
-function renderWorld(world) {
-    let worldMapTable = document.getElementById('worldMapTable')
-    worldMapTable.innerHTML = ""
-    for (let x = 0; x < world.width; ++x) {
-        let tableRow = document.createElement('tr')
-        for (let y = 0; y < world.height; ++y) {
-            const tile = world.tile(x, y)
-            
-            let tileRect = document.createElement('div')
-            tileRect.setAttribute('id', `tile_${x}-${y}`)
-            tileRect.setAttribute('class', tile.id)
-            tileRect.setAttribute('onclick', `onClickTile(${x}, ${y});`)
-            
-            let creatureCounter = document.createElement('b')
-            creatureCounter.setAttribute('class', 'creatureCounter')
-            creatureCounter.innerText = String(world.creaturesAt(x, y).length)
-            tileRect.append(creatureCounter)
-    
-            let tableCell = document.createElement('td')
-            tableCell.append(tileRect)
-            
-            tableRow.append(tableCell)
-        }
-        worldMapTable.appendChild(tableRow)
-    }
+function renderWorld() {
+    let worldMapItem = document.getElementById('worldMapItem')
+    worldMapItem.innerHTML = ''
+    worldMapItem.append(worldView.generateHTML())
 }
 
-function renderTile(tile) {
-    let tileView = document.getElementById("tileView")
-    tileView.innerHTML = ""
-    if (!tile)
-        return;
+function renderTile() {
+    let tileViewItem = document.getElementById('tileViewItem')
+    tileViewItem.innerHTML = ''
+    tileViewItem.append(tileView.generateHTML())
+}
 
-    let creatures = gameEngine.world.creaturesAt(tile.x, tile.y)
-    const creaturesMass = creatures.reduce((sum, c) => { return sum + c.mass() }, 0 )
-
-    tileView.innerText += `x:${tile.x} y:${tile.y} 🐘${creaturesMass}/${tile.creatureMassCapacity}\n`
-    tileView.innerText += ` 🌱${tile.food[Food.PLANT]}/${tile.plantFoodCapacity}\t`
-    tileView.innerText += ` 🍖${tile.food[Food.MEAT]}\t`
-    tileView.innerText += ` 🦴${tile.food[Food.CARRION]}\n`
-
-    for (let creature of creatures)
-        tileView.innerText += creature.toString() + "\n"
+function renderCreature() {
+    let creatureViewItem = document.getElementById('creatureViewItem')
+    creatureViewItem.innerHTML = ''
+    creatureViewItem.append(creatureView.generateHTML())
 }
 
 function onSimulateOneTurn() {
     gameEngine.processTurn()
-    renderWorld(gameEngine.world)
-    renderTile(currentTile)
+    renderWorld()
+    if (currentTile)
+        onClickTile(currentTile.x, currentTile.y)
+    renderCreature()
 }
 
 let isSimulationRunning = false
@@ -78,10 +61,10 @@ function onToggleSimulation() {
         stepButton.removeAttribute('disabled')
 
     if (isSimulationRunning) {
-        const interval = 250
+        const INTERVAL = 250
         let exec = () => {
             onSimulateOneTurn()
-            cancelHandle = setTimeout(exec, interval)
+            cancelHandle = setTimeout(exec, INTERVAL)
         }
         exec()
     } else {
@@ -90,14 +73,38 @@ function onToggleSimulation() {
 }
 
 function onClickTile(x, y) {
+    if (currentTile) {
+        let cell = document.getElementById(`tile_${currentTile.x}-${currentTile.y}`)
+        if (cell)
+            cell.setAttribute('selected', 'false')
+    }
+
     let tile = gameEngine.world.tile(x, y)
-    renderTile(tile)
     currentTile = tile
+    tileView = new TileView(tile, world)
+    renderTile()
+
+    let cell = document.getElementById(`tile_${x}-${y}`)
+    if (cell)
+        cell.setAttribute('selected', 'true')
 }
 
-document.onSimulateOneTurn = onSimulateOneTurn
-document.onClickTile = onClickTile
-document.onToggleSimulation = onToggleSimulation
+function onClickCreature(id) {
+    currentCreature = null
+    for (let creature of world.creatures) {
+        if (creature.id === id) {
+            currentCreature = creature
+            break
+        }
+    }
+    creatureView = new FullCreatureView(currentCreature)
+    renderCreature()
+}
+
+window.onSimulateOneTurn = onSimulateOneTurn
+window.onToggleSimulation = onToggleSimulation
+window.onClickTile = onClickTile
+window.onClickCreature = onClickCreature
 
 document.onkeydown = function(event) {
     event = event || window.event;
@@ -105,4 +112,4 @@ document.onkeydown = function(event) {
         if (!isSimulationRunning)
             onSimulateOneTurn()
     }
-};
+}

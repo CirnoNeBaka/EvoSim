@@ -29,12 +29,21 @@ function createBasicCreature() {
     return creature
 }
 
+let CREATURE_ID_COUNTER = 0
+function generateID() {
+    if (CREATURE_ID_COUNTER >= Number.MAX_SAFE_INTEGER)
+        CREATURE_ID_COUNTER = 0
+    return CREATURE_ID_COUNTER++
+}
+
 class Creature {
     constructor(genes, x = 0, y = 0) {
+        this.id = generateID()
         this.x = x
         this.y = y
         
         this.genes = cloneGenes(genes)
+        Object.defineProperty(this, 'genes', { writable: false })
         this.createBasicStats()
 
         this.alive = true
@@ -59,15 +68,10 @@ class Creature {
         stats.lifespan = this.genePower('LONGEVITY') * 10
         stats.divideChance = this.genePower('FERTILITY') / 10.0
 
-        try {
-        stats.attack      = Object.values(this.genes).reduce((acc, gene) => { acc.add(gene.getAttack());      return acc }, new Fight.Damage())
-        stats.defence     = Object.values(this.genes).reduce((acc, gene) => { acc.add(gene.getDefence());     return acc }, new Fight.Damage())
-        stats.retribution = Object.values(this.genes).reduce((acc, gene) => { acc.add(gene.getRetribution()); return acc }, new Fight.Damage())
-        } catch (e) {
-            console.warn(this.genes)
-            throw e
-        }
-        
+        stats.attack      = Object.values(this.genes).reduce((acc, gene) => { return acc.add(gene.getAttack()) }, new Fight.Damage())
+        stats.defence     = Object.values(this.genes).reduce((acc, gene) => { return acc.add(gene.getDefence()) }, new Fight.Damage())
+        stats.retribution = Object.values(this.genes).reduce((acc, gene) => { return acc.add(gene.getRetribution()) }, new Fight.Damage())
+
         this.basicStats = stats
         for (let key of Object.keys(stats))
             Object.defineProperty(this.basicStats, key, { writable: false })
@@ -279,23 +283,6 @@ class Creature {
 
     kill() {
         this.alive = false
-    }
-
-    toString() {
-        let description = ``
-        description += ` ⌛${this.age}/${this.lifespan()}`
-        description += ` 💖${this.hp}/${this.maxHP()}`
-        description += ` 💙${this.energy}/${this.energyConsumption()}`
-        description += ` 💛${this.fat}/${this.fatCapacity()}`
-        description += ` 🐘${this.mass()}`
-        description += ` 🦶${this.speed()}`
-
-        for (let gene of Object.values(this.genes))
-            description += ` ${gene.icon}${gene.power}`
-        
-        description += ` G${this.generation}`
-
-        return description
     }
 }
 

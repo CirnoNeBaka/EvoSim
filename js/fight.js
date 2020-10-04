@@ -2,22 +2,40 @@
 
 import * as RNG from './rng.js'
 
-const DMG_PHYSICAL = Symbol('PHYSICAL')
-const DMG_FIRE = Symbol('FIRE')
-const DMG_COLD = Symbol('COLD')
-const DMG_ACID = Symbol('ACID')
+const DMG_PHYSICAL = 'physical' // Symbol('physical')
+const DMG_FIRE = 'fire' // Symbol('fire')
+const DMG_COLD = 'cold' // Symbol('cold')
+const DMG_ELECTRIC = 'electric'
+const DMG_ACID = 'acid' // Symbol('acid')
+
 
 const DAMAGE_TYPES = [
     DMG_PHYSICAL,
     DMG_FIRE,
     DMG_COLD,
+    DMG_ELECTRIC,
     DMG_ACID,
 ]
 
 class Damage {
     constructor(data) {
         for (let type of DAMAGE_TYPES)
-            this[type] = data ? data[type] : 0
+            this[type] = 0
+
+        if (data)
+            for (let type of DAMAGE_TYPES)
+                if (data.hasOwnProperty(type))
+                    this[type] = data[type]
+    
+        //console.log("DAMAGE CREATED", this, data)
+    }
+
+    damageSum() {
+        let result = 0
+        for (let type of DAMAGE_TYPES) {
+            result += this[type]
+        }
+        return result
     }
 
     add(dmg) {

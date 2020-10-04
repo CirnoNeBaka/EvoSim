@@ -4,8 +4,8 @@ import * as RNG from './rng.js'
 import * as Food from './food.js'
 import * as Fight from './fight.js'
 
-const GENE_POWER_MIN = 1
-const GENE_POWER_MAX = 10
+export const GENE_POWER_MIN = 1
+export const GENE_POWER_MAX = 10
 
 class Gene {
     constructor(stats) {
@@ -51,67 +51,65 @@ const GENE_MASS = {
     id: 'MASS',
     isEssential: true,
     energyCost: 0,
-    icon: '🐘',
 }
 
 const GENE_SPEED = {
     id: 'SPEED',
     isEssential: true,
     energyCost: 2,
-    icon: '🦶',
 }
 
 const GENE_LONGEVITY = {
     id: 'LONGEVITY',
     isEssential: true,
     energyCost: 1,
-    icon: '🕧',
+    description: '🕧',
 }
 
 const GENE_FERTILITY = {
     id: 'FERTILITY',
     isEssential: true,
     energyCost: 1,
-    icon: '♈',
+    description: '♈',
 }
 
 const GENE_FAT = {
     id: 'FAT',
     energyCost: 5,
-    icon: '💛',
+    description: '💛',
 }
 
 const GENE_REGENERATION = {
     id: 'REGENERATION',
     energyCost: 1,
-    icon: '💚',
+    description: '💚',
 }
 
 const GENE_CARNIVORE = {
     id: 'CARNIVORE',
     energyCost: 0,
-    icon: '🍖',
+    description: '🍖',
     foodType: Food.MEAT
 }
 
 const GENE_HERBIVORE = {
     id: 'HERBIVORE',
     energyCost: 0,
-    icon: '🌿',
+    description: '🌿',
     foodType: Food.PLANT,
 }
 
 const GENE_SCAVENGER = {
     id: 'SCAVENGER',
     energyCost: 0,
-    icon: '🦴',
+    description: '🦴',
     foodType: Food.CARRION,
 }
 
 const GENE_CLAWS = {
     id: 'CLAWS',
     energyCost: 1,
-    icon: '⚔CL',
+    description: '⚔CL',
     attack: {
         [Fight.DMG_PHYSICAL]: 25
     }
@@ -120,7 +118,7 @@ const GENE_CLAWS = {
 const GENE_FANGS = {
     id: 'FANGS',
     energyCost: 1,
-    icon: '⚔FA',
+    description: '⚔FA',
     attack: {
         [Fight.DMG_PHYSICAL]: 25
     }
@@ -129,7 +127,7 @@ const GENE_FANGS = {
 const GENE_FIRE_BREATH = {
     id: 'FIRE_BREATH',
     energyCost: 4,
-    icon: '⚔FIR',
+    description: '⚔FIR',
     attack: {
         [Fight.DMG_FIRE]: 25
     }
@@ -138,7 +136,7 @@ const GENE_FIRE_BREATH = {
 const GENE_ACID_SPIT = {
     id: 'ACID_SPIT',
     energyCost: 4,
-    icon: '⚔ACD',
+    description: '⚔ACD',
     attack: {
         [Fight.DMG_ACID]: 25
     }
@@ -148,7 +146,7 @@ const GENE_FUR = {
     id: 'FUR',
     energyCost: 1,
     massCost: 0,
-    icon: '🛡F',
+    description: '🛡F',
     defence: {
         [Fight.DMG_PHYSICAL]: 2,
         [Fight.DMG_COLD]: 20
@@ -159,7 +157,7 @@ const GENE_CHITIN = {
     id: 'CHITIN',
     energyCost: 1,
     massCost: 1,
-    icon: '🛡CH',
+    description: '🛡CH',
     defence: {
         [Fight.DMG_PHYSICAL]: 5,
         [Fight.DMG_FIRE]: 2,
@@ -171,7 +169,7 @@ const GENE_SCALES = {
     id: 'SCALES',
     energyCost: 2,
     massCost: 5,
-    icon: '🛡SC',
+    description: '🛡SC',
     defence: {
         [Fight.DMG_PHYSICAL]: 25,
         [Fight.DMG_FIRE]: 5,
@@ -182,7 +180,7 @@ const GENE_SHELL = {
     id: 'SHELL',
     energyCost: 4,
     massCost: 25,
-    icon: '🛡SH',
+    description: '🛡SH',
     defence: {
         [Fight.DMG_PHYSICAL]: 50,
         [Fight.DMG_ACID]: 5,
@@ -193,7 +191,7 @@ const GENE_NEEDLES = {
     id: 'NEEDLES',
     energyCost: 1,
     massCost: 1,
-    icon: '🛡⚔ND',
+    description: '🛡⚔ND',
     retribution: {
         [Fight.DMG_PHYSICAL]: 2
     }
@@ -203,7 +201,7 @@ const GENE_SPIKES = {
     id: 'SPIKES',
     energyCost: 2,
     massCost: 5,
-    icon: '🛡⚔SPK',
+    description: '🛡⚔SPK',
     retribution: {
         [Fight.DMG_PHYSICAL]: 10
     }
@@ -213,7 +211,7 @@ const GENE_BURNING_SKIN = {
     id: 'BURNING_SKIN',
     energyCost: 4,
     massCost: 0,
-    icon: '🛡⚔FIR',
+    description: '🛡⚔FIR',
     defence: {
         [Fight.DMG_FIRE]: 25
     },
@@ -226,7 +224,7 @@ const GENE_ACID_SKIN = {
     id: 'ACID_SKIN',
     energyCost: 4,
     massCost: 0,
-    icon: '🛡⚔ACD',
+    description: '🛡⚔ACD',
     defence: {
         [Fight.DMG_ACID]: 25
     },

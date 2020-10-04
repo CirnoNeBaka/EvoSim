@@ -2,7 +2,7 @@ body {
     background: #161616
 }
 
-h1, p, b {
+h1, p, b, div, td, th {
     color: white;
     font-family: 'Courier New';
 }
@@ -12,18 +12,43 @@ h1, p, b {
     grid-gap: 10px;
 }
 
-.worldMapItem {
+#worldMapItem,
+#tileViewItem,
+#creatureViewItem {
+    border: 2px solid #666666;
+    background-color: #222222;
+    border-radius: 8px;
+    padding: 8px;
+    overflow: auto;
+}
+
+#worldMapItem {
+    width: 324px;
     grid-row-start: 1;
     grid-row-end: 2;
     grid-column-start: 1;
     grid-column-end: 2;
 }
 
-.tileViewItem {
+#tileViewItem {
+    min-width: 700px;
     grid-row-start: 1;
     grid-row-end: 2;
     grid-column-start: 2;
     grid-column-end: 3;
+}
+
+#creatureViewItem {
+    min-width: 300px;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 3;
+    grid-column-end: 4;
+}
+
+.tileViewCreatureTable td {
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .creatureCounter {
@@ -32,33 +57,63 @@ h1, p, b {
     font-size: 16px;
 }
 
-.grassland {
+.worldMapCell {
     height: 25px;
     width: 25px;
+    text-align: center;
+    border: 2px solid transparent;
+}
+
+.worldMapCell[selected="true"] {
+    border: 2px solid red;
+}
+
+.worldMapCell[tileID="grassland"] {
     background-color: #00ff00;
-    text-align: center;
 }
 
-.desert {
-    height: 25px;
-    width: 25px;
+.worldMapCell[tileID="desert"] {
     background-color: #ffff00;
-    text-align: center;
 }
 
-.sea {
-    height: 25px;
-    width: 25px;
+.worldMapCell[tileID="sea"] {
     background-color: #0000ff;
-    text-align: center;
 }
 
-#tileView {
-    width: 950px;
-    height: 500px;
-    background-color: #222222;
+.barViewCellFull,
+.barViewCellEmpty,
+.genePowerCellFull,
+.genePowerCellEmpty {
+    width: 10px;
+    height: 25px;
+    border-radius: 4px;
+}
+
+.barViewCellFull,
+.genePowerCellFull {
+    background-color: green;
+}
+
+.barViewCellEmpty,
+.genePowerCellEmpty {
+    background-color: #333333;
+}
+
+.damageTable {
     border: 2px solid #666666;
-    overflow: auto;
+    border-radius: 8px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.damageTable td {
+    padding-left: 8px;
+    padding-right: 8px;
+    background-color: transparent;
+}
+
+.deadLabel {
+    color: red;
 }
 
 #license {
