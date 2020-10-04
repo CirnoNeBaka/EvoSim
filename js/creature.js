@@ -38,6 +38,12 @@ class Creature {
         this.age = 0
         this.generation = 0
         this.alive = true
+        this.foodEfficiency = this.generateFoodEfficiency()
+    }
+
+    generateFoodEfficiency() {
+        const totalFoodGenesScore = FEEDING_GENES.reduce((acc, gene) => { return acc + this.genePower(gene.id) }, 0)
+        return FEEDING_GENES.reduce((result, gene) => { result[gene.foodType] = this.genePower(gene.id) / totalFoodGenesScore; return result }, {})
     }
 
     hasGene(geneID) {
@@ -74,16 +80,18 @@ class Creature {
     fatCapacity() {
         if (!this.hasGene('FAT'))
             return 0
-        return this.genePower('FAT') * 10
+        return this.genePower('FAT') * 25
     }
 
     divideChance() {
         if (this.age <= 1)
             return 0 // to prevent exponential zerg rush
+        if (this.energy < this.energyConsumption())
+            return 0
         let chance = this.genePower('FERTILITY') / 10.0
         const energyDeficit = (this.energyConsumption() - this.energy) / this.energyConsumption()
         chance = chance * Math.pow(1.0 - energyDeficit, 2)
-        //console.log("Divide chance:", chance.toFixed(2), "deficit:", energyDeficit.toFixed(2))
+        console.log("Divide chance:", chance.toFixed(2), "deficit:", energyDeficit.toFixed(2))
         return chance
     }
 
@@ -116,17 +124,21 @@ class Creature {
     }
 
     canEat(foodType) {
-        return requiredGene(foodType).id in this.genes
+        return this.hasGene(requiredGene(foodType).id)
     }
 
     tileFoodAttractiveness(tile, world) {
         let score = tile.food.types().reduce((acc, type) => {
-            return acc + (this.canEat(type) ? tile.food[type] : 0)
+            return acc + (this.canEat(type) ? this.energyGain(type, tile.food[type]) : 0)
         }, 0)
         score /= Math.max(1, world.creaturesAt(tile.x, tile.y).length)
         if (tile.x !== this.x && tile.y !== this.y)
             score++
         return score
+    }
+
+    energyGain(foodType, foodAmount) {
+        return Math.round(this.foodEfficiency[foodType] * foodAmount)
     }
 
     feed(food) {
@@ -137,9 +149,11 @@ class Creature {
             for (let type of food.types()) {
                 if (this.canEat(type)) {
                     const foodConsumed = Math.min(food[type], energyDeficit)
-                    this[deposit] += foodConsumed
+                    const energyGained = this.energyGain(type, foodConsumed)
+                    //console.log(`Consumed ${foodConsumed} ${type} as ${energyGained} energy`)
                     food[type] -= foodConsumed
-                    energyDeficit -= foodConsumed
+                    this[deposit] += energyGained
+                    energyDeficit -= energyGained
                 }
             }
         }
@@ -207,7 +221,7 @@ class Creature {
         }
 
         // ensure creature has at least one feeding gene
-        if (!FEEDING_GENES.some(gene => gene.ID in genes)) {
+        if (!FEEDING_GENES.some(gene => gene.id in genes)) {
             let feedingGene = RNG.randomElement(FEEDING_GENES)
             genes[feedingGene.id] = new Gene(feedingGene)
             gainedGenes.push(feedingGene.id)

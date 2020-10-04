@@ -17,8 +17,8 @@ class Game {
     generateNewCreatures() {
         const creatureCount = this.world.creatures.length
         this.spawnWorms(Math.max(BASE_CREATURE_COUNT - creatureCount, 0))
-        if (RNG.roll01(0.05))
-            this.spawnWorms(1)
+        if (RNG.roll01(0.1))
+            this.spawnWorms(10)
     }
 
     spawnWorms(count) {
@@ -89,7 +89,7 @@ class Game {
                 creature.kill()
                 let tile = this.world.tile(creature.x, creature.y)
                 tile.creatureMass -= creature.mass()
-                tile.food.meat += creature.mass()
+                tile.food.carrion += creature.mass()
                 corpses.push(creature)
             }
         }

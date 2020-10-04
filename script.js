@@ -1,10 +1,7 @@
 'use strict'
 
-import './js/world.js'
-import * as rng from './js/rng.js'
 import { Game } from './js/game.js'
 import { World } from './js/world.js'
-import { createBasicCreature } from './js/creature.js'
 
 let world = new World()
 world.generateTiles()

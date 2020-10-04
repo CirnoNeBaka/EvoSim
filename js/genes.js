@@ -81,22 +81,25 @@ const GENE_REGENERATION = {
 const GENE_CARNIVORE = {
     id: 'CARNIVORE',
     isEssential: false,
-    energyCost: 1,
+    energyCost: 0,
     icon: '🍖',
+    foodType: 'meat',
 }
 
 const GENE_HERBIVORE = {
     id: 'HERBIVORE',
     isEssential: false,
-    energyCost: 1,
+    energyCost: 0,
     icon: '🌿',
+    foodType: 'plant',
 }
 
 const GENE_SCAVENGER = {
     id: 'SCAVENGER',
     isEssential: false,
-    energyCost: 1,
+    energyCost: 0,
     icon: '💀',
+    foodType: 'carrion',
 }
 
 const ESSENTIAL_GENES = [
@@ -109,6 +112,10 @@ const ESSENTIAL_GENES = [
 const NON_ESSENTIAL_GENES = [
     GENE_FAT,
     GENE_REGENERATION,
+    
+    GENE_HERBIVORE,
+    GENE_CARNIVORE,
+    GENE_SCAVENGER,
 ]
 
 const FEEDING_GENES = [
