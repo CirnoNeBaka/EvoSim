@@ -22,9 +22,9 @@ export class GeneView {
 
     generateHTML() {
         return this.generateIcon()
-        if (this.gene.description) {
-            return this.generateText() 
-        }
+        // if (this.gene.description) {
+        //     return this.generateText() 
+        // }
     }
 }
 

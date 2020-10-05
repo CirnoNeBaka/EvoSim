@@ -112,7 +112,8 @@ const GENE_CLAWS = {
     description: '⚔CL',
     attack: {
         [Fight.DMG_PHYSICAL]: 25
-    }
+    },
+    exclusiveFlags: ['LIMB_END']
 }
 
 const GENE_FANGS = {
@@ -130,7 +131,8 @@ const GENE_FIRE_BREATH = {
     description: '⚔FIR',
     attack: {
         [Fight.DMG_FIRE]: 25
-    }
+    },
+    exclusiveFlags: ['ELEMENTAL_BREATH']
 }
 
 const GENE_ACID_SPIT = {
@@ -139,7 +141,8 @@ const GENE_ACID_SPIT = {
     description: '⚔ACD',
     attack: {
         [Fight.DMG_ACID]: 25
-    }
+    },
+    exclusiveFlags: ['ELEMENTAL_BREATH']
 }
 
 const GENE_FUR = {
@@ -150,7 +153,8 @@ const GENE_FUR = {
     defence: {
         [Fight.DMG_PHYSICAL]: 2,
         [Fight.DMG_COLD]: 20
-    }
+    },
+    exclusiveFlags: ['SKIN_ARMOR']
 }
 
 const GENE_CHITIN = {
@@ -162,7 +166,8 @@ const GENE_CHITIN = {
         [Fight.DMG_PHYSICAL]: 5,
         [Fight.DMG_FIRE]: 2,
         [Fight.DMG_ACID]: 10,
-    }
+    },
+    exclusiveFlags: ['SKIN_ARMOR']
 }
 
 const GENE_SCALES = {
@@ -173,7 +178,8 @@ const GENE_SCALES = {
     defence: {
         [Fight.DMG_PHYSICAL]: 25,
         [Fight.DMG_FIRE]: 5,
-    }
+    },
+    exclusiveFlags: ['SKIN_ARMOR']
 }
 
 const GENE_SHELL = {
@@ -184,7 +190,8 @@ const GENE_SHELL = {
     defence: {
         [Fight.DMG_PHYSICAL]: 50,
         [Fight.DMG_ACID]: 5,
-    }
+    },
+    exclusiveFlags: ['SKIN_ARMOR']
 }
 
 const GENE_NEEDLES = {
@@ -194,7 +201,8 @@ const GENE_NEEDLES = {
     description: '🛡⚔ND',
     retribution: {
         [Fight.DMG_PHYSICAL]: 2
-    }
+    },
+    exclusiveFlags: ['SKIN_PROTRUSIONS']
 }
 
 const GENE_SPIKES = {
@@ -204,7 +212,8 @@ const GENE_SPIKES = {
     description: '🛡⚔SPK',
     retribution: {
         [Fight.DMG_PHYSICAL]: 10
-    }
+    },
+    exclusiveFlags: ['SKIN_PROTRUSIONS']
 }
 
 const GENE_BURNING_SKIN = {
@@ -217,7 +226,8 @@ const GENE_BURNING_SKIN = {
     },
     retribution: {
         [Fight.DMG_FIRE]: 10
-    }
+    },
+    exclusiveFlags: ['ELEMENTAL_SKIN']
 }
 
 const GENE_ACID_SKIN = {
@@ -230,7 +240,8 @@ const GENE_ACID_SKIN = {
     },
     retribution: {
         [Fight.DMG_ACID]: 10
-    }
+    },
+    exclusiveFlags: ['ELEMENTAL_SKIN']
 }
 
 const ESSENTIAL_GENES = [
@@ -267,11 +278,11 @@ const NON_ESSENTIAL_GENES = [
     GENE_ACID_SKIN,
 ]
 
-const FEEDING_GENES = [
-    GENE_HERBIVORE,
-    GENE_CARNIVORE,
-    GENE_SCAVENGER,
-]
+const FEEDING_GENES = NON_ESSENTIAL_GENES.filter(gene => gene.foodType)
+
+const OFFENSIVE_GENES   = NON_ESSENTIAL_GENES.filter(gene => gene.attack)
+const DEFENSIVE_GENES   = NON_ESSENTIAL_GENES.filter(gene => gene.defence)
+const RETRIBUTION_GENES = NON_ESSENTIAL_GENES.filter(gene => gene.retribution)
 
 export function requiredGene(foodType) {
     for (let gene of FEEDING_GENES)
@@ -285,6 +296,9 @@ export {
     ESSENTIAL_GENES,
     NON_ESSENTIAL_GENES,
     FEEDING_GENES,
+    OFFENSIVE_GENES,
+    DEFENSIVE_GENES,
+    RETRIBUTION_GENES,
 
     GENE_MASS,
     GENE_SPEED,
@@ -297,4 +311,3 @@ export {
     GENE_CARNIVORE,
     GENE_SCAVENGER,
 }
-

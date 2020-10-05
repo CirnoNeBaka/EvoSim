@@ -59,11 +59,16 @@ class Creature {
         let stats = {}
         
         stats.foodEfficiency = this.generateFoodEfficiency()
-        stats.mass = this.genePower('MASS') * 10 + this.genePower('FAT') * 5
+        stats.bioMass = this.genePower('MASS') * 10 + this.genePower('FAT') * 5
+        stats.mass = stats.bioMass + Object.values(this.genes).reduce((acc, gene) => {
+            return acc + gene.power * (gene.massCost || 0)
+        }, 0)
         stats.maxHP = this.genePower('MASS') * 25
         stats.speed = Math.floor(Math.max(1, this.genePower('SPEED') * 10 - stats.mass / 2))
         stats.regeneration = this.genePower('REGENERATION') * 10
-        stats.energyConsumption = stats.mass + Object.values(this.genes).reduce((acc, gene) => { return acc + gene.power * gene.energyCost }, 0)
+        stats.energyConsumption = stats.bioMass + Object.values(this.genes).reduce((acc, gene) => {
+            return acc + gene.power * gene.energyCost
+        }, 0)
         stats.fatCapacity = this.hasGene('FAT') ? this.genePower('FAT') * 25 : 0
         stats.lifespan = this.genePower('LONGEVITY') * 10
         stats.divideChance = this.genePower('FERTILITY') / 10.0
@@ -256,11 +261,25 @@ class Creature {
             }
         }
 
+        let checkExclusiveGenes = (newGene) => {
+            if (!newGene.exclusiveFlags)
+                return true
+            return Object.values(this.genes).every((gene) => {
+                if (!gene.exclusiveFlags)
+                    return true
+                return !gene.exclusiveFlags.some((flag) => {
+                    return newGene.exclusiveFlags.includes(flag)
+                })
+            })
+        }
+
         if (RNG.roll01(NEW_GENE_CHANCE)) {
             let acceptableGenes = NON_ESSENTIAL_GENES
                 .filter(gene => !this.hasGene(gene.id))
-                .map(gene => new Gene(gene));
+                .filter(gene => checkExclusiveGenes(gene))
+                .map(gene => new Gene(gene))
             if (acceptableGenes.length) {
+                console.log(acceptableGenes)
                 let newGene = RNG.randomElement(acceptableGenes)
                 genes[newGene.id] = newGene
                 gainedGenes.push(newGene.id)
