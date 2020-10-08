@@ -1,6 +1,7 @@
 'use strict'
 
 import * as Fight from '../fight.js'
+import { GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from '../genes.js'
 import { GenesView } from './geneView.js'
 import * as Utils from './utils.js'
 import { createIcon } from './utils.js'
@@ -18,6 +19,14 @@ function shortDefenceText(creature) {
 function shortRetributionText(creature) {
     const retributionSum = Object.values(creature.retribution()).reduce((sum, a) => { return sum + a }, 0)
     return `🛡⚔${retributionSum}`
+}
+
+function feedingText(creature) {
+    let result = ''
+    if (creature.hasGene(GENE_HERBIVORE.id)) result += '🌿'
+    if (creature.hasGene(GENE_CARNIVORE.id)) result += '🍖'
+    if (creature.hasGene(GENE_SCAVENGER.id)) result += '🦴'
+    return result
 }
 
 export class CreaturesView {
@@ -46,6 +55,7 @@ export class CreaturesView {
             row.append(this.addTextCell(shortRetributionText(creature)))
             row.append(this.addTextCell(`🐘${creature.mass()}`))
             row.append(this.addTextCell(`🦶${creature.speed()}`))
+            row.append(this.addTextCell(feedingText(creature)))
 
             let showDetailsButton = document.createElement('button')
             showDetailsButton.innerText = '👁️‍🗨️'
@@ -129,7 +139,7 @@ export class FullCreatureView {
         addView('Mass:', this.creature.mass())
         addView('Speed:', this.creature.speed())
         addView('Regeneration:', `+${this.creature.regeneration()} HP / turn`)
-        addView('Divide chance:', `${this.creature.divideChance() * 100.0}% / turn`)
+        addView('Divide chance:', `${this.creature.divideChance().toFixed(2) * 100.0}% / turn`)
         addView('Generation:', `${this.creature.generation} ancestors`)
 
         return table

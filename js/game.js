@@ -7,6 +7,8 @@ import './tile.js'
 import './creature.js'
 import { createBasicCreature } from './creature.js'
 import { FoodStorage } from './tile.js'
+import { Hunt } from './fight.js'
+import { GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from './genes.js'
 
 const BASE_CREATURE_COUNT = 10
 
@@ -45,7 +47,7 @@ class Game {
         this.cleanupDead(corpses)
         this.world.forEachCreature((creature) => { creature.energy = 0; })
 
-        let speedSortedCreatures = this.world.creatures.sort((c1, c2) => { return c2.speed() - c1.speed() })
+        let speedSortedCreatures = this.world.creatures.sort((c1, c2) => { return c1.speed() - c2.speed() })
         for (let creature of speedSortedCreatures) {
             let currentTile = this.world.tile(creature.x, creature.y)
             let adjacentTiles = this.world.adjacentTiles(creature.x, creature.y).filter(tile => {
@@ -57,6 +59,7 @@ class Game {
         }
 
         this.feedCreatures()
+        this.hunt()
         this.procreate()
         this.world.forEachCreature((creature) => { creature.age++ })
         //console.log("===END TURN===")
@@ -83,10 +86,6 @@ class Game {
             const survivedOldAge = creature.age < creature.lifespan()
             const survived = survivedHunger && survivedOldAge
             if (!survived) {
-//                const reason = !survivedHunger ? "hunger" : "old age"
-//                 console.log(`Creature at (${creature.x}, ${creature.y}) died from ${reason} \
-// with ${creature.energy}/${creature.energyConsumption()} energy \
-// and ${creature.hp}/${creature.maxHP()} hp`)
                 creature.kill()
                 let tile = this.world.tile(creature.x, creature.y)
                 tile.creatureMass -= creature.mass()
@@ -108,7 +107,7 @@ class Game {
 
         for (let [ tile, creatures ] of populatedTiles.entries()) {
             //let hungryCreatures = creatures.slice // ЗАГАДКА ДЫРЫ: копирование массива не работает!!! В результирующем массиве length == 0!
-            let hungryCreatures = creatures
+            let hungryCreatures = creatures.filter(c => c.hasGene(GENE_HERBIVORE.id) || c.hasGene(GENE_SCAVENGER.id))
 
             // First, everyone eats excess food.
             // Creatures with lower energy consumption eat first
@@ -155,10 +154,46 @@ class Game {
         }
     }
 
+    hunt() {
+        for (let hunter of this.world.creatures) {
+            if (hunter.attack().damageSum() > 0 &&
+                hunter.hasGene(GENE_CARNIVORE.id) &&
+                hunter.isHungry()) {
+                let prey = Hunt.choosePrey(hunter, this.world)
+                if (!prey)
+                    continue
+                const attackDamage = hunter.attack().subtract(prey.defence())
+                const retributionDamage = prey.retribution()
+                    .add(prey.attack())
+                    .subtract(hunter.defence())
+                prey.hp -= attackDamage.damageSum()
+                hunter.hp -= retributionDamage.damageSum()
+                let food = new FoodStorage({ meat: 0 })
+                if (prey.hp <= 0) {
+                    prey.kill()
+                    food.meat += prey.deathMeat()
+                    console.log(prey, "was killed by", hunter, "for", food.meat, "meat")
+                    this.world.creatures.splice(this.world.creatures.indexOf(prey), 1)
+                }
+                if (hunter.hp <= 0) {
+                    hunter.kill()
+                    console.log("hunter", hunter, "died attacking")
+                    food.meat += hunter.deathMeat()
+                    this.world.creatures.splice(this.world.creatures.indexOf(hunter))
+                }
+                //console.log(hunter, 'attacked', prey, "dealt", attackDamage, 'took', retributionDamage, 'gained meat', food.meat)
+                if (hunter.alive) {
+                    hunter.feed(food)
+                }
+                let tile = this.world.tile(hunter.x, hunter.y)
+                tile.food.carrion += food.meat
+            }
+        }
+    }
+
     procreate() {
         let newborns = []
         this.world.forEachCreature((creature) => {
-            let tile = this.world.tile(creature.x, creature.y)
             if (RNG.roll01(creature.divideChance())) {
                 let child = creature.divide()
                 newborns.push(child)

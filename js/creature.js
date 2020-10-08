@@ -2,9 +2,10 @@
 
 import './genes.js'
 import * as RNG from './rng.js'
-import { Gene, ESSENTIAL_GENES, NON_ESSENTIAL_GENES, FEEDING_GENES, requiredGene } from './genes.js'
+import { Gene, ESSENTIAL_GENES, NON_ESSENTIAL_GENES, FEEDING_GENES, requiredGene, GENE_CARNIVORE, OFFENSIVE_GENES } from './genes.js'
 import { Damage } from './fight.js'
 import * as Fight from './fight.js'
+import { createIcon } from './view/utils.js'
 
 function cloneGenes(genes) {
     let result = {}
@@ -23,7 +24,11 @@ function createBasicCreature() {
     }, {})
 
     const feedingGene = RNG.randomElement(FEEDING_GENES)
-    genes[feedingGene.id] = new Gene(feedingGene)
+    genes[feedingGene.id] = new Gene(feedingGene)    
+    if (feedingGene.id === GENE_CARNIVORE.id) {
+        let offensiveGene = RNG.randomElement(OFFENSIVE_GENES)
+        genes[offensiveGene.id] = new Gene(offensiveGene)
+    }
 
     let creature = new Creature(genes)
     return creature
@@ -65,7 +70,7 @@ class Creature {
         }, 0)
         stats.maxHP = this.genePower('MASS') * 25
         stats.speed = Math.floor(Math.max(1, this.genePower('SPEED') * 10 - stats.mass / 2))
-        stats.regeneration = this.genePower('REGENERATION') * 10
+        stats.regeneration = 5 + this.genePower('REGENERATION') * 10
         stats.energyConsumption = stats.bioMass + Object.values(this.genes).reduce((acc, gene) => {
             return acc + gene.power * gene.energyCost
         }, 0)
@@ -85,7 +90,13 @@ class Creature {
 
     generateFoodEfficiency() {
         const totalFoodGenesScore = FEEDING_GENES.reduce((acc, gene) => { return acc + this.genePower(gene.id) }, 0)
-        return FEEDING_GENES.reduce((result, gene) => { result[gene.foodType] = this.genePower(gene.id) / totalFoodGenesScore; return result }, {})
+        const myFeedingGenes = FEEDING_GENES.filter(gene => this.hasGene(gene.id))
+        const specializationBonus = 1.0 + ((myFeedingGenes.length === 1) ? (0.05 * (this.genePower(myFeedingGenes[0].id) - 1)) : 0.0)
+        console.log("specializationBonus:", specializationBonus)
+        return FEEDING_GENES.reduce((result, gene) => {
+            result[gene.foodType] = (this.genePower(gene.id) / totalFoodGenesScore) * specializationBonus
+            return result
+        }, {})
     }
 
     hasGene(geneID) {
@@ -169,6 +180,14 @@ class Creature {
         return bestTile
     }
 
+    energyDeficit() {
+        return this.energyConsumption() - this.energy
+    }
+
+    fatDeficit() {
+        return this.fatCapacity() - this.fat
+    }
+
     isHungry() {
         const needEnergy = this.energy < this.energyConsumption()
         const needFat = this.hasGene('FAT') && this.fat < this.fatCapacity()
@@ -183,9 +202,12 @@ class Creature {
         let score = tile.food.types().reduce((acc, type) => {
             return acc + (this.canEat(type) ? this.energyGain(type, tile.food[type]) : 0)
         }, 0)
-        score /= Math.max(1, world.creaturesAt(tile.x, tile.y).length)
+        const creatures = world.creaturesAt(tile.x, tile.y)
+        score /= Math.max(1, creatures.length)
         if (tile.x !== this.x && tile.y !== this.y)
             score++
+        if (this.hasGene(GENE_CARNIVORE.id))
+            score += creatures.length
         return score
     }
 
@@ -204,8 +226,8 @@ class Creature {
                     const energyGained = this.energyGain(type, foodConsumed)
                     //console.log(`Consumed ${foodConsumed} ${type.toString()} as ${energyGained} energy`, this.foodEfficiency)
                     food[type] -= foodConsumed
-                    this[deposit] += energyGained
-                    energyDeficit -= energyGained
+                    this[deposit] += Math.min(energyGained, limit)
+                    energyDeficit -= Math.max(0, energyGained)
                 }
             }
         }
@@ -277,9 +299,9 @@ class Creature {
             let acceptableGenes = NON_ESSENTIAL_GENES
                 .filter(gene => !this.hasGene(gene.id))
                 .filter(gene => checkExclusiveGenes(gene))
+                .filter(gene => !gene.attack || this.hasGene(GENE_CARNIVORE.id)) // only carnivores are allowed to gain offensive mutations
                 .map(gene => new Gene(gene))
             if (acceptableGenes.length) {
-                console.log(acceptableGenes)
                 let newGene = RNG.randomElement(acceptableGenes)
                 genes[newGene.id] = newGene
                 gainedGenes.push(newGene.id)
@@ -293,6 +315,23 @@ class Creature {
             gainedGenes.push(feedingGene.id)
         }
 
+        // if a creature gains a carnivore mutation ensure that it can attack
+        if (gainedGenes.includes(GENE_CARNIVORE.id) && this.attack().damageSum() == 0) {
+            let offensiveGene = RNG.randomElement(OFFENSIVE_GENES)
+            genes[offensiveGene.id] = new Gene(offensiveGene)
+            gainedGenes.push(offensiveGene.id)
+        }
+
+        // if a creature loses carnivore mutation it also loses all offensive mutations
+        if (lostGenes.includes(GENE_CARNIVORE.id)) {
+            for (let gene of OFFENSIVE_GENES) {
+                if (gene.id in this.genes) {
+                    delete this.genes[gene.id]
+                    lostGenes.push(gene.id)
+                }
+            }
+        }
+
         return {
             mutatedGenes : mutatedGenes,
             gainedGenes: gainedGenes,
@@ -302,6 +341,10 @@ class Creature {
 
     kill() {
         this.alive = false
+    }
+
+    deathMeat() {
+        return this.basicStats.bioMass * 2
     }
 }
 

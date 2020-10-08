@@ -44,21 +44,21 @@ class Tile {
 
 const TILE_GRASSLAND = {
     id: 'grassland',
-    plantFoodCapacity: 150,
+    plantFoodCapacity: 200,
     creatureMassCapacity: 200,
     flags: []
 }
 
 const TILE_DESERT = {
     id: 'desert',
-    plantFoodCapacity: 10,
+    plantFoodCapacity: 25,
     creatureMassCapacity: 200,
     flags: []
 }
 
 const TILE_SEA = {
     id: 'sea',
-    plantFoodCapacity: 50,
+    plantFoodCapacity: 100,
     creatureMassCapacity: 500,
     flags: [ 'WATER' ]
 }

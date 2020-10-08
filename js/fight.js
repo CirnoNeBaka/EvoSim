@@ -53,9 +53,50 @@ class Damage {
         }
         return result
     }
+
+    multiply(factor) {
+        let result = Object.assign(new Damage(), this)
+        for (let type of DAMAGE_TYPES) {
+            result[type] *= factor
+        }
+        return result
+    }
 }
 
+const PREY_SCORE = Symbol('prey_score')
+
 class Hunt {
+    static choosePrey(hunter, world) {
+        const effectiveAttackDamage = (hunter, prey) => {
+            return hunter.attack()
+                .subtract(prey.defence())
+                .damageSum()
+        }
+        const effectiveRetributionDamage = (hunter, prey) => {
+            return prey.retribution()
+                .add(prey.attack())
+                .subtract(hunter.defence())
+                .damageSum()
+        }
+        const energyDeficit = hunter.energyDeficit() + hunter.fatDeficit()
+        const preyScore = (hunter, prey) => {
+            return Math.min(prey.deathMeat(), energyDeficit)
+                - effectiveRetributionDamage(hunter, prey)
+                + Math.min(effectiveAttackDamage(hunter, prey), prey.hp)
+        }
+        const prey = world.creaturesAt(hunter.x, hunter.y)
+            .filter(prey => prey !== hunter)
+            //.filter(prey => effectiveAttackDamage(hunter, prey) >= prey.hp)
+            //.filter(prey => effectiveRetributionDamage(hunter, prey) < hunter.hp)
+        
+        prey.forEach(prey => { prey[PREY_SCORE] = preyScore(hunter, prey); console.log(prey, "score is", prey[PREY_SCORE]) })
+        prey.sort((c1, c2) => { return c2[PREY_SCORE] - c1[PREY_SCORE] })
+
+        if (prey.length)
+           console.log("Hunter at", hunter.x, hunter.y, "with attack", hunter.attack().damageSum(), "consideres prey", prey)
+        return prey.length ? prey[0] : null
+    }
+
     constructor(predators, prey) {
         this.predators = Array.isArray(predators) ? predators : [ predators ]
         this.prey = Array.isArray(prey) ? prey : [ prey ]

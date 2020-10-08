@@ -1,8 +1,8 @@
 'use strict'
 
-const FOOD_PLANT = Symbol('plant')
-const FOOD_MEAT = Symbol('meat')
-const FOOD_CARRION = Symbol('çarrion')
+const FOOD_PLANT = 'plant'
+const FOOD_MEAT = 'meat'
+const FOOD_CARRION = 'çarrion'
 
 const FOOD_TYPES = [
     FOOD_PLANT,

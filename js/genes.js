@@ -35,15 +35,15 @@ class Gene {
     }
 
     getAttack() {
-        return new Fight.Damage(this.attack)
+        return new Fight.Damage(this.attack).multiply(this.power)
     }
 
     getDefence() {
-        return new Fight.Damage(this.defence)
+        return new Fight.Damage(this.defence).multiply(this.power)
     }
 
     getRetribution() {
-        return new Fight.Damage(this.retribution)
+        return new Fight.Damage(this.retribution).multiply(this.power)
     }
 }
 
@@ -122,6 +122,15 @@ const GENE_FANGS = {
     description: '⚔FA',
     attack: {
         [Fight.DMG_PHYSICAL]: 25
+    }
+}
+
+const GENE_STING = {
+    id: 'STING',
+    energyCost: 2,
+    description: '⚔ST',
+    attack: {
+        [Fight.DMG_PHYSICAL]: 15
     }
 }
 
@@ -216,6 +225,17 @@ const GENE_SPIKES = {
     exclusiveFlags: ['SKIN_PROTRUSIONS']
 }
 
+const GENE_HORNS = {
+    id: 'HORNS',
+    energyCost: 2,
+    massCost: 5,
+    description: '🛡⚔HOR',
+    retribution: {
+        [Fight.DMG_PHYSICAL]: 15
+    },
+    exclusiveFlags: ['HEAD_PROTRUSIONS']
+}
+
 const GENE_BURNING_SKIN = {
     id: 'BURNING_SKIN',
     energyCost: 4,
@@ -262,6 +282,7 @@ const NON_ESSENTIAL_GENES = [
     // offensive genes
     GENE_CLAWS,
     GENE_FANGS,
+    GENE_STING,
     GENE_FIRE_BREATH,
     GENE_ACID_SPIT,
 
@@ -274,6 +295,7 @@ const NON_ESSENTIAL_GENES = [
     // retribution genes
     GENE_NEEDLES,
     GENE_SPIKES,
+    GENE_HORNS,
     GENE_BURNING_SKIN,
     GENE_ACID_SKIN,
 ]
