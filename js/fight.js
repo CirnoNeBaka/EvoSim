@@ -110,6 +110,7 @@ export {
     DMG_PHYSICAL,
     DMG_FIRE,
     DMG_COLD,
+    DMG_ELECTRIC,
     DMG_ACID,
 
     Hunt
