@@ -9,7 +9,7 @@ const CLD = Fight.DMG_COLD
 const ELE = Fight.DMG_ELECTRIC
 const ACD = Fight.DMG_ACID
 
-let assert = window.assert
+let assert = chai.assert
 
 describe('Damage', function() {
 
@@ -50,7 +50,6 @@ describe('Damage', function() {
         const dmg2 = new Damage({ [PHY]: 10, [FIR]: 50, [CLD]: 0, [ACD]: 0 })
         const result = dmg1.add(dmg2)
 
-        assert.equal(typeof result, 'object')
         assert(result instanceof Damage)
         assert.notEqual(result, dmg1)
         assert.equal(result[PHY], 20)
@@ -65,23 +64,20 @@ describe('Damage', function() {
         const dmg2 = new Damage({ [PHY]: 10, [FIR]: 50, [CLD]: 0, [ACD]: 10 })
         const result = dmg1.subtract(dmg2)
 
-        assert.equal(typeof result, 'object')
         assert(result instanceof Damage)
         assert.notEqual(result, dmg1)
         assert.equal(result[PHY], 15)
-        assert.equal(result[FIR], 0)
+        assert.equal(result[FIR], 0, 'Damage can`t be negative')
         assert.equal(result[CLD], 50)
         assert.equal(result[ACD], 0)
         assert.equal(result[ELE], 0)
     })
-
     
     it(`multiply() multiples damage`, function() {
         const dmg = new Damage({ [PHY]: 25, [FIR]: 1, [CLD]: 50, [ACD]: 0 })
         const multiplier = 2.0
         const result = dmg.multiply(multiplier)
 
-        assert.equal(typeof result, 'object')
         assert(result instanceof Damage)
         assert.notEqual(result, dmg)
         assert.equal(result[PHY], 50)

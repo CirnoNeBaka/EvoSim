@@ -16,14 +16,15 @@ function cloneGenes(genes) {
     return result
 }
 
-function createBasicCreature() {
+function createBasicCreature(feedingGene) {
     let genes = ESSENTIAL_GENES.reduce((acc, gene) => {
         let geneInstance = new Gene(gene)
         acc[gene.id] = geneInstance
         return acc
     }, {})
 
-    const feedingGene = RNG.randomElement(FEEDING_GENES)
+    if (!feedingGene)
+        feedingGene = RNG.randomElement(FEEDING_GENES)
     genes[feedingGene.id] = new Gene(feedingGene)    
     if (feedingGene.id === GENE_CARNIVORE.id) {
         let offensiveGene = RNG.randomElement(OFFENSIVE_GENES)
