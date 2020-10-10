@@ -3,7 +3,6 @@
 export class WorldView {
     constructor(world) {
         this.world = world
-        //this.onClickTile = () => {}
     }
 
     generateHTML() {

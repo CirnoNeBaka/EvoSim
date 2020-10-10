@@ -1,7 +1,7 @@
 'use strict'
 
-import { Game } from './js/game.js'
-import { World } from './js/world.js'
+import { Game } from './js/core/game.js'
+import { World } from './js/core/world.js'
 
 import { WorldView } from './js/view/worldView.js'
 import { TileView } from './js/view/tileView.js'

@@ -5,7 +5,7 @@ import * as RNG from './rng.js'
 import { Gene, ESSENTIAL_GENES, NON_ESSENTIAL_GENES, FEEDING_GENES, requiredGene, GENE_CARNIVORE, OFFENSIVE_GENES } from './genes.js'
 import { Damage } from './fight.js'
 import * as Fight from './fight.js'
-import { createIcon } from './view/utils.js'
+import { createIcon } from '../view/utils.js'
 
 function cloneGenes(genes) {
     let result = {}

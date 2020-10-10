@@ -1,6 +1,6 @@
 'use strict'
 
-import * as Genes from '../genes.js'
+import * as Genes from '../core/genes.js'
 import { createIcon } from './utils.js'
 
 export class GeneView {

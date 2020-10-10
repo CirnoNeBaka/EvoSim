@@ -1,7 +1,7 @@
 'use strict'
 
-import * as Fight from '../fight.js'
-import { GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from '../genes.js'
+import * as Fight from '../core/fight.js'
+import { GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from '../core/genes.js'
 import { GenesView } from './geneView.js'
 import * as Utils from './utils.js'
 import { createIcon } from './utils.js'

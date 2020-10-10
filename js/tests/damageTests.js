@@ -1,7 +1,7 @@
 'use strict'
 
-import { Damage, DAMAGE_TYPES } from '../fight.js'
-import * as Fight from '../fight.js'
+import { Damage, DAMAGE_TYPES } from '../core/fight.js'
+import * as Fight from '../core/fight.js'
 
 const PHY = Fight.DMG_PHYSICAL
 const FIR = Fight.DMG_FIRE

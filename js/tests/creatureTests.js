@@ -1,8 +1,8 @@
 'use strict'
 
-import * as Food from '../food.js'
-import { createBasicCreature, Creature } from '../creature.js'
-import { ESSENTIAL_GENES, FEEDING_GENES, Gene, GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from '../genes.js'
+import * as Food from '../core/food.js'
+import { createBasicCreature, Creature } from '../core/creature.js'
+import { ESSENTIAL_GENES, FEEDING_GENES, Gene, GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from '../core/genes.js'
 
 let assert = chai.assert
 let expect = chai.expect

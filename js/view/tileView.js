@@ -1,6 +1,6 @@
 'use strict'
 
-import * as Food from '../food.js'
+import * as Food from '../core/food.js'
 import { CreaturesView } from './creatureView.js' 
 
 export class TileView {
