@@ -2,9 +2,6 @@
 
 import * as Food from './food.js'
 
-// percentage of carrion that carries over to the next turn
-const CARRION_DECAY_RATE = 0.8
-
 class FoodStorage {
     constructor(amounts) {
         for (let type of Food.TYPES) {
@@ -32,7 +29,7 @@ class Tile {
 
     refresh() {
         this.regrowPlantFood()
-        this.food[Food.CARRION] = Math.floor(this.food[Food.CARRION] * CARRION_DECAY_RATE)
+        this.food[Food.CARRION] = Math.floor(this.food[Food.CARRION] * Universe.food.carrionDecayRate)
         this.food[Food.CARRION] += this.food[Food.MEAT]
         this.food[Food.MEAT] = 0
     }

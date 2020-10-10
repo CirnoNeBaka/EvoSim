@@ -1,6 +1,5 @@
 'use strict'
 
-import * as RNG from './rng.js'
 import * as Food from './food.js'
 import * as Fight from './fight.js'
 
@@ -8,26 +7,22 @@ export const GENE_POWER_MIN = 1
 export const GENE_POWER_MAX = 10
 
 class Gene {
-    constructor(stats) {
+    constructor(stats, power) {
         this.isEssential = false
         for (let key of Object.keys(stats)) 
             this[key] = stats[key]
 
-        this.power = GENE_POWER_MIN
+        this.power = power ? power : GENE_POWER_MIN
     }
 
-    mutate(chance) {
-        if (Math.random() < chance) {
-            if (RNG.coinFlip()) {
-                this.power = Math.min(this.power + 1, GENE_POWER_MAX)
-            } else {
-                this.power -= 1
-                if (this.isEssential)
-                    this.power = Math.max(GENE_POWER_MIN, this.power)
-            }
-            return true
-        }
-        return false
+    mutateUp() {
+        this.power = Math.min(this.power + 1, GENE_POWER_MAX)
+    }
+
+    mutateDown() {
+        if (this.isEssential && this.power === GENE_POWER_MIN)
+            return
+        this.power--
     }
 
     isDead() {
@@ -45,6 +40,22 @@ class Gene {
     getRetribution() {
         return new Fight.Damage(this.retribution).multiply(this.power)
     }
+}
+
+export function createGeneMap(genes) {
+    return genes.reduce((acc, gene) => {
+        acc[gene.id] = new Gene(gene)
+        return acc
+    }, {})
+}
+
+export function cloneGenes(genes) {
+    let result = {}
+    for (let [ geneID, gene ] of Object.entries(genes)) {
+        let geneCopy = Object.assign(new Gene({}), gene)
+        result[geneID] = geneCopy
+    }
+    return result
 }
 
 const GENE_MASS = {
@@ -328,8 +339,26 @@ export {
     GENE_FERTILITY,
 
     GENE_FAT,
+    GENE_REGENERATION,
 
     GENE_HERBIVORE,
     GENE_CARNIVORE,
     GENE_SCAVENGER,
+
+    GENE_CLAWS,
+    GENE_FANGS,
+    GENE_STING,
+    GENE_FIRE_BREATH,
+    GENE_ACID_SPIT,
+
+    GENE_FUR,
+    GENE_CHITIN,
+    GENE_SCALES,
+    GENE_SHELL,
+
+    GENE_NEEDLES,
+    GENE_SPIKES,
+    GENE_HORNS,
+    GENE_BURNING_SKIN,
+    GENE_ACID_SKIN,
 }

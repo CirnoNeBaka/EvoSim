@@ -30,10 +30,8 @@ class Game {
             
             const x = RNG.rollInt(0, this.world.width - 1)
             const y = RNG.rollInt(0, this.world.height - 1)
-            worm.x = x
-            worm.y = y
 
-            this.world.addCreature(worm)
+            this.world.addCreature(worm, x, y)
             //console.log(`Worm spawned!`, worm)
         }
     }
@@ -200,7 +198,7 @@ class Game {
             }
         })
         for (let c of newborns)
-            this.world.addCreature(c)
+            this.world.addCreature(c, c.x, c.y)
     }
 
     cleanupDead(corpses) {

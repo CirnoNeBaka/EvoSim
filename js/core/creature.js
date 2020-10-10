@@ -2,19 +2,10 @@
 
 import './genes.js'
 import * as RNG from './rng.js'
-import { Gene, ESSENTIAL_GENES, NON_ESSENTIAL_GENES, FEEDING_GENES, requiredGene, GENE_CARNIVORE, OFFENSIVE_GENES } from './genes.js'
-import { Damage } from './fight.js'
+import { Gene, cloneGenes, ESSENTIAL_GENES, FEEDING_GENES, requiredGene, GENE_CARNIVORE, OFFENSIVE_GENES } from './genes.js'
 import * as Fight from './fight.js'
-import { createIcon } from '../view/utils.js'
-
-function cloneGenes(genes) {
-    let result = {}
-    for (let [ geneID, gene ] of Object.entries(genes)) {
-        let geneCopy = Object.assign(new Gene({}), gene)
-        result[geneID] = geneCopy
-    }
-    return result
-}
+import * as Rules from './rules/mutation.js'
+import { Universe } from './universe.js'
 
 function createBasicCreature(feedingGene) {
     let genes = ESSENTIAL_GENES.reduce((acc, gene) => {
@@ -92,8 +83,8 @@ class Creature {
     generateFoodEfficiency() {
         const totalFoodGenesScore = FEEDING_GENES.reduce((acc, gene) => { return acc + this.genePower(gene.id) }, 0)
         const myFeedingGenes = FEEDING_GENES.filter(gene => this.hasGene(gene.id))
-        const specializationBonus = 1.0 + ((myFeedingGenes.length === 1) ? (0.05 * (this.genePower(myFeedingGenes[0].id) - 1)) : 0.0)
-        console.log("specializationBonus:", specializationBonus)
+        const isSpecialized = myFeedingGenes.length === 1
+        const specializationBonus = Universe.food.specializtionBonus(isSpecialized ? this.genePower(myFeedingGenes[0].id) : 0)
         return FEEDING_GENES.reduce((result, gene) => {
             result[gene.foodType] = (this.genePower(gene.id) / totalFoodGenesScore) * specializationBonus
             return result
@@ -191,7 +182,7 @@ class Creature {
 
     isHungry() {
         const needEnergy = this.energy < this.energyConsumption()
-        const needFat = this.hasGene('FAT') && this.fat < this.fatCapacity()
+        const needFat = this.fat < this.fatCapacity()
         return needEnergy || needFat
     }
 
@@ -250,94 +241,21 @@ class Creature {
     }
 
     divide() {
-        let newGenes = cloneGenes(this.genes)
-        const mutations = this.mutateGenes(newGenes)
+        let mutations = new Rules.MutationAlgorithm(this)
+        mutations.execute()
+        const newGenes = mutations.genes
 
         let child = new Creature(newGenes, this.x, this.y)
         child.generation = this.generation + 1
-        //console.log("creature", this, "divided!", child)
-        // if (mutations.mutatedGenes.length)
-        //     console.log("New creature mutated in:", mutations.mutatedGenes.join(", "))
-        // if (mutations.lostGenes.length)
-        //     console.log("New creature lost genes:", mutations.lostGenes.join(", "))
-        // if (mutations.gainedGenes.length)
-        //     console.log("New creature gained genes:", mutations.gainedGenes.join(", "))
+      
+        console.log("creature", this, "divided!", child)
+        if (mutations.mutatedGenes.length)
+            console.log("New creature mutated in:", mutations.mutatedGenes.join(", "))
+        if (mutations.lostGenes.length)
+            console.log("New creature lost genes:", mutations.lostGenes.join(", "))
+        if (mutations.gainedGenes.length)
+            console.log("New creature gained genes:", mutations.gainedGenes.join(", "))
         return child
-    }
-
-    mutateGenes(genes) {
-        const MUTATION_CHANCE = 0.1
-        const NEW_GENE_CHANCE = 0.1
-        
-        let mutatedGenes = []
-        let gainedGenes = []
-        let lostGenes = []
-        
-        for (let gene of Object.values(genes)) {
-            if (gene.mutate(MUTATION_CHANCE)) {
-                if (gene.isDead()) {
-                    lostGenes.push(gene.id)
-                    delete genes[gene.id]
-                } else {
-                    mutatedGenes.push(gene.id)
-                }
-            }
-        }
-
-        let checkExclusiveGenes = (newGene) => {
-            if (!newGene.exclusiveFlags)
-                return true
-            return Object.values(this.genes).every((gene) => {
-                if (!gene.exclusiveFlags)
-                    return true
-                return !gene.exclusiveFlags.some((flag) => {
-                    return newGene.exclusiveFlags.includes(flag)
-                })
-            })
-        }
-
-        if (RNG.roll01(NEW_GENE_CHANCE)) {
-            let acceptableGenes = NON_ESSENTIAL_GENES
-                .filter(gene => !this.hasGene(gene.id))
-                .filter(gene => checkExclusiveGenes(gene))
-                .filter(gene => !gene.attack || this.hasGene(GENE_CARNIVORE.id)) // only carnivores are allowed to gain offensive mutations
-                .map(gene => new Gene(gene))
-            if (acceptableGenes.length) {
-                let newGene = RNG.randomElement(acceptableGenes)
-                genes[newGene.id] = newGene
-                gainedGenes.push(newGene.id)
-            }
-        }
-
-        // ensure creature has at least one feeding gene
-        if (!FEEDING_GENES.some(gene => gene.id in genes)) {
-            let feedingGene = RNG.randomElement(FEEDING_GENES)
-            genes[feedingGene.id] = new Gene(feedingGene)
-            gainedGenes.push(feedingGene.id)
-        }
-
-        // if a creature gains a carnivore mutation ensure that it can attack
-        if (gainedGenes.includes(GENE_CARNIVORE.id) && this.attack().damageSum() == 0) {
-            let offensiveGene = RNG.randomElement(OFFENSIVE_GENES)
-            genes[offensiveGene.id] = new Gene(offensiveGene)
-            gainedGenes.push(offensiveGene.id)
-        }
-
-        // if a creature loses carnivore mutation it also loses all offensive mutations
-        if (lostGenes.includes(GENE_CARNIVORE.id)) {
-            for (let gene of OFFENSIVE_GENES) {
-                if (gene.id in this.genes) {
-                    delete this.genes[gene.id]
-                    lostGenes.push(gene.id)
-                }
-            }
-        }
-
-        return {
-            mutatedGenes : mutatedGenes,
-            gainedGenes: gainedGenes,
-            lostGenes : lostGenes
-        }
     }
 
     kill() {

@@ -2,10 +2,13 @@
 
 import { Game } from './js/core/game.js'
 import { World } from './js/core/world.js'
+import { setupGlobalUniverse } from './js/core/universe.js'
 
 import { WorldView } from './js/view/worldView.js'
 import { TileView } from './js/view/tileView.js'
 import { FullCreatureView } from './js/view/creatureView.js'
+
+setupGlobalUniverse()
 
 let world = new World()
 world.generateTiles()

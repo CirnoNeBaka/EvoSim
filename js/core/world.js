@@ -4,52 +4,58 @@ import './tile.js';
 import './creature.js';
 import { Tile, TILE_DESERT, TILE_GRASSLAND } from './tile.js';
 
-const WORLD_WIDTH = 10
-const WORLD_HEIGHT = 10
-
 class World {
     constructor() {
-        this.width = WORLD_WIDTH
-        this.height = WORLD_HEIGHT
+        this.width = Universe.world.width
+        this.height = Universe.world.height
         this.tiles = Array(this.width * this.height)
         this.creatures = []
     }
 
     tile(x, y) {
-        return this.tiles[x + y * this.width]
+        let tile = this.tiles[x + y * this.width]
+        if (!tile) throw Error(`Invalid tile index: (${x},${y})`)
+        return tile
     }
 
     creaturesAt(x, y) {
+        if (x !== undefined && y === undefined)
+            return this.creaturesAt(x.x, x.y)
         return this.creatures.filter((creature) => { return creature.x === x && creature.y === y })
     }
 
-    addCreature(creature) {
-        let tile = this.tile(creature.x, creature.y)
+    addCreature(creature, x, y) {
+        if (x !== undefined && y === undefined)
+            return this.addCreature(creature, x.x, x.y)
+        
+        let tile = this.tile(x, y)
         if (tile.creatureMass + creature.mass() > tile.creatureMassCapacity)
             return false;
         tile.creatureMass += creature.mass()
-        this.assertCreatureMass(tile)
         this.creatures.push(creature)
+        creature.x = x
+        creature.y = y
         return true
     }
 
     moveCreature(creature, fromTile, toTile) {
+        if (toTile.creatureMass + creature.mass() > toTile.creatureMassCapacity)
+            return false
+
         if (fromTile)
             fromTile.creatureMass -= creature.mass()
         if (toTile) {
             creature.x = toTile.x
             creature.y = toTile.y
             toTile.creatureMass += creature.mass()
-            this.assertCreatureMass(toTile)
         }
-    }
-
-    assertCreatureMass(tile) {
-        if (tile.creatureMass > tile.creatureMassCapacity)
-            console.warn("CHEATER:", tile)
+        return true
     }
 
     adjacentTiles(x, y) {
+        if (x !== undefined && y === undefined)
+            return this.adjacentTiles(x.x, x.y)
+
         const left  = (x > 0) ? (x - 1) : (this.width - 1)
         const right = (x < this.width - 1) ? (x + 1) : 0
         const up    = (y > 0) ? (y - 1) : (this.height - 1)
