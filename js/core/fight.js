@@ -89,11 +89,11 @@ class Hunt {
             //.filter(prey => effectiveAttackDamage(hunter, prey) >= prey.hp)
             //.filter(prey => effectiveRetributionDamage(hunter, prey) < hunter.hp)
         
-        prey.forEach(prey => { prey[PREY_SCORE] = preyScore(hunter, prey); console.log(prey, "score is", prey[PREY_SCORE]) })
+        prey.forEach(prey => { prey[PREY_SCORE] = preyScore(hunter, prey) })
         prey.sort((c1, c2) => { return c2[PREY_SCORE] - c1[PREY_SCORE] })
 
-        if (prey.length)
-           console.log("Hunter at", hunter.x, hunter.y, "with attack", hunter.attack().damageSum(), "consideres prey", prey)
+        //if (prey.length)
+        //   console.log("Hunter at", hunter.x, hunter.y, "with attack", hunter.attack().damageSum(), "consideres prey", prey)
         return prey.length ? prey[0] : null
     }
 

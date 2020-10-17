@@ -15,8 +15,8 @@ export class WorldView {
                 
                 let tileRect = document.createElement('div')
                 tileRect.setAttribute('id', `tile_${x}-${y}`)
-                tileRect.setAttribute('class', `worldMapCell`)
-                tileRect.setAttribute('tileID', `${tile.id}`)
+                tileRect.setAttribute('class', `worldMapCell ${tile.id}`)
+                //tileRect.setAttribute('tileID', `${tile.id}`)
                 tileRect.setAttribute('onclick', `window.onClickTile(${x}, ${y})`)
                 
                 let creatureCounter = document.createElement('b')

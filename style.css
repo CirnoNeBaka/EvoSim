@@ -15,6 +15,8 @@ h1, p, b, div, td, th {
 #worldMapItem,
 #tileViewItem,
 #creatureViewItem {
+    height: 100%;
+    max-height: 700px;
     border: 2px solid #666666;
     background-color: #222222;
     border-radius: 8px;
@@ -68,16 +70,32 @@ h1, p, b, div, td, th {
     border: 2px solid red;
 }
 
-.worldMapCell[tileID="grassland"] {
+.forest {
+    background-color: #008f00;
+}
+
+.grassland {
     background-color: #00ff00;
 }
 
-.worldMapCell[tileID="desert"] {
+.savannah {
+    background-color: #c3ff00;
+}
+
+.desert {
     background-color: #ffff00;
 }
 
-.worldMapCell[tileID="sea"] {
+.river {
+    background-color: #00aeff;
+}
+
+.sea {
     background-color: #0000ff;
+}
+
+.high_mountains {
+    background-color: #493e28;
 }
 
 .barViewCellFull,

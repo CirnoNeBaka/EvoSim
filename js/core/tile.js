@@ -2,6 +2,13 @@
 
 import * as Food from './food.js'
 
+export const MovementType = {
+    WALK: 'WALK',
+    FLY: 'FLY',
+    SWIM: 'SWIM',
+    CLIMB: 'CLIMB',
+}
+
 class FoodStorage {
     constructor(amounts) {
         for (let type of Food.TYPES) {
@@ -39,25 +46,60 @@ class Tile {
     }
 }
 
+const TILE_FOREST = {
+    id: 'forest',
+    plantFoodCapacity: 750,
+    creatureMassCapacity: 250,
+    movementTypes: [ MovementType.WALK, MovementType.FLY ],
+    symbol: 'F',
+}
+
 const TILE_GRASSLAND = {
     id: 'grassland',
+    plantFoodCapacity: 500,
+    creatureMassCapacity: 500,
+    movementTypes: [ MovementType.WALK, MovementType.FLY ],
+    symbol: '/',
+}
+
+const TILE_SAVANNAH = {
+    id: 'savannah',
     plantFoodCapacity: 200,
-    creatureMassCapacity: 200,
-    flags: []
+    creatureMassCapacity: 500,
+    movementTypes: [ MovementType.WALK, MovementType.FLY ],
+    symbol: ':',
 }
 
 const TILE_DESERT = {
     id: 'desert',
     plantFoodCapacity: 25,
-    creatureMassCapacity: 200,
-    flags: []
+    creatureMassCapacity: 500,
+    movementTypes: [ MovementType.WALK, MovementType.FLY ],
+    symbol: '.',
+}
+
+const TILE_RIVER = {
+    id: 'river',
+    plantFoodCapacity: 650,
+    creatureMassCapacity: 750,
+    movementTypes: [ MovementType.WALK, MovementType.SWIM, MovementType.FLY ],
+    symbol: '=',
 }
 
 const TILE_SEA = {
     id: 'sea',
+    plantFoodCapacity: 350,
+    creatureMassCapacity: 2000,
+    movementTypes: [ MovementType.SWIM, MovementType.FLY ],
+    symbol: '~',
+}
+
+const TILE_HIGH_MOUNTAINS = {
+    id: 'high_mountains',
     plantFoodCapacity: 100,
-    creatureMassCapacity: 500,
-    flags: [ 'WATER' ]
+    creatureMassCapacity: 250,
+    movementTypes: [ MovementType.CLIMB, MovementType.FLY ],
+    symbol: 'M',
 }
 
 export {
@@ -65,6 +107,10 @@ export {
     Tile,
 
     TILE_GRASSLAND,
+    TILE_FOREST,
+    TILE_SAVANNAH,
     TILE_DESERT,
+    TILE_RIVER,
     TILE_SEA,
+    TILE_HIGH_MOUNTAINS,
 }

@@ -2,12 +2,13 @@
 
 import './genes.js'
 import * as RNG from './rng.js'
-import { Gene, cloneGenes, ESSENTIAL_GENES, FEEDING_GENES, requiredGene, GENE_CARNIVORE, OFFENSIVE_GENES } from './genes.js'
+import { Gene, cloneGenes, ESSENTIAL_GENES, FEEDING_GENES, requiredGene, GENE_CARNIVORE, OFFENSIVE_GENES, GENE_LEGS } from './genes.js'
 import * as Fight from './fight.js'
 import * as Rules from './rules/mutation.js'
 import { Universe } from './universe.js'
+import { createIcon } from '../view/utils.js'
 
-function createBasicCreature(feedingGene) {
+function createBasicCreature(feedingGene, movementGene = GENE_LEGS) {
     let genes = ESSENTIAL_GENES.reduce((acc, gene) => {
         let geneInstance = new Gene(gene)
         acc[gene.id] = geneInstance
@@ -16,13 +17,18 @@ function createBasicCreature(feedingGene) {
 
     if (!feedingGene)
         feedingGene = RNG.randomElement(FEEDING_GENES)
-    genes[feedingGene.id] = new Gene(feedingGene)    
+
+    genes[feedingGene.id] = new Gene(feedingGene)
+    genes[movementGene.id] = new Gene(movementGene)
+
     if (feedingGene.id === GENE_CARNIVORE.id) {
         let offensiveGene = RNG.randomElement(OFFENSIVE_GENES)
         genes[offensiveGene.id] = new Gene(offensiveGene)
     }
 
     let creature = new Creature(genes)
+    if (!creature.movementTypes().size)
+        throw Error("WTF?!", creature, feedingGene, movementGene)
     return creature
 }
 
@@ -91,7 +97,8 @@ class Creature {
         }, {})
     }
 
-    hasGene(geneID) {
+    hasGene(gene) {
+        const geneID = gene.id ? gene.id : gene
         return Object.keys(this.genes).includes(geneID)
     }
 
@@ -116,6 +123,20 @@ class Creature {
 
     speed() {
         return this.basicStats.speed
+    }
+
+    movementTypes() {
+        return Object.values(this.genes).reduce((acc, gene) => {
+            if (gene.movementTypes)
+                for (let type of gene.movementTypes)
+                    acc.add(type)
+            return acc
+        }, new Set())
+    }
+
+    canMoveTo(tile) {
+        const thisTypes = this.movementTypes()
+        return tile.movementTypes.some(type => thisTypes.has(type))
     }
 
     energyConsumption() {
@@ -154,22 +175,9 @@ class Creature {
         return this.basicStats.retribution
     }
 
-    move(currentTile, availableTiles, world) {
-        if (!availableTiles.length)
-            return currentTile;
-
-        let tiles = availableTiles.concat(currentTile)
-        tiles.sort((t1, t2) => {
-            const score1 = this.tileFoodAttractiveness(t1, world)
-            const score2 = this.tileFoodAttractiveness(t2, world)
-            return score1 - score2
-        })
-        let bestTile = tiles[tiles.length - 1]
-        this.x = bestTile.x
-        this.y = bestTile.y
-        // if (bestTile != currentTile)
-        //     console.log("Creature", this, "moved to", bestTile.x, bestTile.y)
-        return bestTile
+    move(tile) {
+        this.x = tile.x
+        this.y = tile.y
     }
 
     energyDeficit() {
@@ -188,19 +196,6 @@ class Creature {
 
     canEat(foodType) {
         return this.hasGene(requiredGene(foodType).id)
-    }
-
-    tileFoodAttractiveness(tile, world) {
-        let score = tile.food.types().reduce((acc, type) => {
-            return acc + (this.canEat(type) ? this.energyGain(type, tile.food[type]) : 0)
-        }, 0)
-        const creatures = world.creaturesAt(tile.x, tile.y)
-        score /= Math.max(1, creatures.length)
-        if (tile.x !== this.x && tile.y !== this.y)
-            score++
-        if (this.hasGene(GENE_CARNIVORE.id))
-            score += creatures.length
-        return score
     }
 
     energyGain(foodType, foodAmount) {
@@ -248,13 +243,13 @@ class Creature {
         let child = new Creature(newGenes, this.x, this.y)
         child.generation = this.generation + 1
       
-        console.log("creature", this, "divided!", child)
-        if (mutations.mutatedGenes.length)
-            console.log("New creature mutated in:", mutations.mutatedGenes.join(", "))
-        if (mutations.lostGenes.length)
-            console.log("New creature lost genes:", mutations.lostGenes.join(", "))
-        if (mutations.gainedGenes.length)
-            console.log("New creature gained genes:", mutations.gainedGenes.join(", "))
+        // console.log("creature", this, "divided!", child)
+        // if (mutations.mutatedGenes.length)
+        //     console.log("New creature mutated in:", mutations.mutatedGenes.join(", "))
+        // if (mutations.lostGenes.length)
+        //     console.log("New creature lost genes:", mutations.lostGenes.join(", "))
+        // if (mutations.gainedGenes.length)
+        //     console.log("New creature gained genes:", mutations.gainedGenes.join(", "))
         return child
     }
 

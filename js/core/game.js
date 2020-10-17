@@ -8,7 +8,8 @@ import './creature.js'
 import { createBasicCreature } from './creature.js'
 import { FoodStorage } from './tile.js'
 import { Hunt } from './fight.js'
-import { GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from './genes.js'
+import { MovementAlgorithm } from './rules/movement.js'
+import { FEEDING_GENES, GENE_CARNIVORE, GENE_HERBIVORE, GENE_LEGS, GENE_SCAVENGER, NON_ESSENTIAL_GENES } from './genes.js'
 
 const BASE_CREATURE_COUNT = 10
 
@@ -26,11 +27,17 @@ class Game {
 
     spawnWorms(count) {
         for (let i = 0; i < count; ++i) {
-            const worm = createBasicCreature()
-            
             const x = RNG.rollInt(0, this.world.width - 1)
             const y = RNG.rollInt(0, this.world.height - 1)
-
+            const tile = this.world.tile(x, y)
+            const movementType = tile.movementTypes ? RNG.randomElement(
+                NON_ESSENTIAL_GENES.filter(gene =>
+                    gene.movementTypes &&
+                    gene.movementTypes.some(type => tile.movementTypes.includes(type))
+                )
+            ) : GENE_LEGS
+            const feedingGene = RNG.randomElement(FEEDING_GENES)
+            const worm = createBasicCreature(feedingGene, movementType)
             this.world.addCreature(worm, x, y)
             //console.log(`Worm spawned!`, worm)
         }
@@ -45,17 +52,7 @@ class Game {
         this.cleanupDead(corpses)
         this.world.forEachCreature((creature) => { creature.energy = 0; })
 
-        let speedSortedCreatures = this.world.creatures.sort((c1, c2) => { return c1.speed() - c2.speed() })
-        for (let creature of speedSortedCreatures) {
-            let currentTile = this.world.tile(creature.x, creature.y)
-            let adjacentTiles = this.world.adjacentTiles(creature.x, creature.y).filter(tile => {
-                return tile.creatureMass + creature.mass() <= tile.creatureMassCapacity
-            })
-
-            let newTile = creature.move(currentTile, adjacentTiles, this.world)
-            this.world.moveCreature(creature, currentTile, newTile)
-        }
-
+        this.moveCreatures()
         this.feedCreatures()
         this.hunt()
         this.procreate()
@@ -92,6 +89,14 @@ class Game {
             }
         }
         return corpses
+    }
+
+    moveCreatures() {
+        let speedSortedCreatures = this.world.creatures.sort((c1, c2) => { return c1.speed() - c2.speed() })
+        for (let creature of speedSortedCreatures) {
+            let movement = new MovementAlgorithm(creature, this.world)
+            movement.execute()
+        }
     }
 
     feedCreatures() {
@@ -170,12 +175,12 @@ class Game {
                 if (prey.hp <= 0) {
                     prey.kill()
                     food.meat += prey.deathMeat()
-                    console.log(prey, "was killed by", hunter, "for", food.meat, "meat")
+                    //console.log(prey, "was killed by", hunter, "for", food.meat, "meat")
                     this.world.creatures.splice(this.world.creatures.indexOf(prey), 1)
                 }
                 if (hunter.hp <= 0) {
                     hunter.kill()
-                    console.log("hunter", hunter, "died attacking")
+                    //console.log("hunter", hunter, "died attacking")
                     food.meat += hunter.deathMeat()
                     this.world.creatures.splice(this.world.creatures.indexOf(hunter))
                 }
@@ -194,7 +199,8 @@ class Game {
         this.world.forEachCreature((creature) => {
             if (RNG.roll01(creature.divideChance())) {
                 let child = creature.divide()
-                newborns.push(child)
+                if (child.canMoveTo(this.world.tile(child.x, child.y)))
+                    newborns.push(child)
             }
         })
         for (let c of newborns)

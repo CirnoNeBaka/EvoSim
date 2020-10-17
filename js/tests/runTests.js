@@ -6,6 +6,7 @@ import './damageTests.js'
 import './tileTests.js'
 import './creatureTests.js'
 import './worldTests.js'
+import './movementTests.js'
 import './mutationTests.js'
 
 setupGlobalUniverse()

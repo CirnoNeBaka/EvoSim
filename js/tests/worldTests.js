@@ -2,13 +2,33 @@
 
 import { createBasicCreature } from '../core/creature.js'
 import { World } from '../core/world.js'
+import { loadMapFromJSON } from '../mapgen/mapParser.js'
 
 let assert = chai.assert
+
+const TEST_MAP_DATA = {
+    "tiles": [
+        "//////////",
+        "//////////",
+        "//////////",
+        "//////////",
+        "//////////",
+        "//////////",
+        "//////////",
+        "//////////",
+        "//////////",
+        "//////////",
+    ]
+}
+
+function testMap() {
+    return loadMapFromJSON(TEST_MAP_DATA)
+}
 
 describe('World', function() {
     
     it('freshly created world has required properties', function() {
-        let world = new World()
+        let world = new World(testMap())
         assert.containsAllKeys(world, [
             'width',
             'height',
@@ -20,8 +40,7 @@ describe('World', function() {
     })
 
     it('world provides access to tiles', function() {
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
 
         assert.isObject(world.tile(0, 0))
         assert.equal(world.tile(0, 0).x, 0)
@@ -31,16 +50,14 @@ describe('World', function() {
     })
 
     it('out of bounds tile access should throw errors', function() {
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
 
         assert.throws(() => { world.tile(-1, -2) })
         assert.throws(() => { world.tile(world.width, world.height) })
     })
 
     it('adjacent tiles are ok', function() {
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
         let tiles = world.adjacentTiles(1, 1)
 
         assert.equal(tiles.length, 4)
@@ -51,8 +68,7 @@ describe('World', function() {
     })
 
     it('world is a torus', function() {
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
         
         let topLeftTiles = world.adjacentTiles(0, 0)
         assert.equal(topLeftTiles.length, 4)
@@ -74,8 +90,7 @@ describe('World', function() {
         creature.x = 0
         creature.y = 0
 
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
         world.addCreature(creature, 2, 3)
 
         assert.isAbove(world.creatures.length, 0)
@@ -84,8 +99,7 @@ describe('World', function() {
     })
 
     it('creaturesAt(x,y) and creatures(tile) getter styles', function() {
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
 
         let creature = createBasicCreature()
         let tile = world.tile(0, 0)
@@ -101,8 +115,7 @@ describe('World', function() {
         creature.x = 0
         creature.y = 0
 
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
         world.addCreature(creature, 0, 0)
 
         let oldTile = world.tile(creature.x, creature.y)
@@ -116,8 +129,7 @@ describe('World', function() {
     })
 
     it('can`t add more creatures than max mass capacity allows', function() {
-        let world = new World()
-        world.generateTiles()
+        let world = new World(testMap())
         
         let targetTile = world.tile(0, 0)
         let fakeFatCreature = { x: 0, y: 0, mass: function() { return targetTile.creatureMassCapacity } }

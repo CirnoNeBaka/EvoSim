@@ -2,8 +2,6 @@
 
 const UNIVERSAL_CONSTANTS = {
     world: {
-        width: 10,
-        height: 10,
     },
     food: {
         // percentage of carrion that carries over to the next turn

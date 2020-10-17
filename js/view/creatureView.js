@@ -1,7 +1,7 @@
 'use strict'
 
 import * as Fight from '../core/fight.js'
-import { GENE_CARNIVORE, GENE_HERBIVORE, GENE_SCAVENGER } from '../core/genes.js'
+import * as Genes from '../core/genes.js'
 import { GenesView } from './geneView.js'
 import * as Utils from './utils.js'
 import { createIcon } from './utils.js'
@@ -23,9 +23,18 @@ function shortRetributionText(creature) {
 
 function feedingText(creature) {
     let result = ''
-    if (creature.hasGene(GENE_HERBIVORE.id)) result += '🌿'
-    if (creature.hasGene(GENE_CARNIVORE.id)) result += '🍖'
-    if (creature.hasGene(GENE_SCAVENGER.id)) result += '🦴'
+    if (creature.hasGene(Genes.GENE_HERBIVORE)) result += '🌿'
+    if (creature.hasGene(Genes.GENE_CARNIVORE)) result += '🍖'
+    if (creature.hasGene(Genes.GENE_SCAVENGER)) result += '🦴'
+    return result
+}
+
+function movementTypeText(creature) {
+    let result = ''
+    if (creature.hasGene(Genes.GENE_LEGS))   result += '👣'
+    if (creature.hasGene(Genes.GENE_FINS))   result += '🐟'
+    if (creature.hasGene(Genes.GENE_HOOVES)) result += '🐎'
+    if (creature.hasGene(Genes.GENE_WINGS))  result += '🦅'
     return result
 }
 
@@ -54,7 +63,8 @@ export class CreaturesView {
             row.append(this.addTextCell(shortDefenceText(creature)))
             row.append(this.addTextCell(shortRetributionText(creature)))
             row.append(this.addTextCell(`🐘${creature.mass()}`))
-            row.append(this.addTextCell(`🦶${creature.speed()}`))
+            //row.append(this.addTextCell(`🦶${creature.speed()}`))
+            row.append(this.addTextCell(movementTypeText(creature)))
             row.append(this.addTextCell(feedingText(creature)))
 
             let showDetailsButton = document.createElement('button')
@@ -131,6 +141,7 @@ export class FullCreatureView {
             table.append(tr)
         }
 
+        addView(`x:${this.creature.x} y:${this.creature.y}`, '')
         addView('💖Health:', this.creature.hp, this.creature.maxHP())
         addView('💙Energy:', this.creature.energy, this.creature.energyConsumption())
         if (this.creature.fatCapacity() > 0)

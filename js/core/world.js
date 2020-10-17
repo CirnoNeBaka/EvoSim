@@ -5,15 +5,22 @@ import './creature.js';
 import { Tile, TILE_DESERT, TILE_GRASSLAND } from './tile.js';
 
 class World {
-    constructor() {
-        this.width = Universe.world.width
-        this.height = Universe.world.height
-        this.tiles = Array(this.width * this.height)
+    constructor(map) {
+        this.initMap(map)
         this.creatures = []
     }
 
+    initMap(map) {
+        if (!Array.isArray(map) || !Array.isArray(map[0]))
+            throw Error('Invalid map')
+
+        this.width = map[0].length
+        this.height = map.length
+        this.tiles = map
+    }
+
     tile(x, y) {
-        let tile = this.tiles[x + y * this.width]
+        let tile = this.tiles[x][y]
         if (!tile) throw Error(`Invalid tile index: (${x},${y})`)
         return tile
     }
@@ -77,22 +84,6 @@ class World {
     forEachCreature(func) {
         for (let i = 0; i < this.creatures.length; ++i)
             func(this.creatures[i])
-    }
-
-    generateTiles() {
-        const GEN_CHANCE_GRASSLAND = 0.08
-        for (let i = 0; i < this.width * this.height; ++i) {
-            let tileType = {}
-            if (Math.random() < GEN_CHANCE_GRASSLAND) {
-                tileType = TILE_GRASSLAND
-            } else {
-                tileType = TILE_DESERT
-            }
-            let tile = new Tile(tileType)
-            tile.x = i % this.width
-            tile.y = Math.floor(i / this.width)
-            this.tiles[i] = tile
-        }
     }
 }
 

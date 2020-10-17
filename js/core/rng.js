@@ -26,11 +26,26 @@ function randomElement(arr) {
     return arr[index]
 }
 
+/**
+ * Shuffles array in place. ES6 version
+ * @param {Array} a items An array containing the items.
+ */
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+        let temp = array[i]
+        array[i] = array[j]
+        array[j] = temp
+    }
+    return array
+}
+
 export {
     roll,
     rollInt,
     roll01,
     testDC,
     coinFlip,
-    randomElement
+    randomElement,
+    shuffle
 }

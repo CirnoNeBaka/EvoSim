@@ -28,6 +28,7 @@ export class MutationAlgorithm {
         this.ensureCreatureHasFoodSource()
         this.ensureCarnivoreHasAttack()
         this.removeOffensiveGenesIfNotCarnivore()
+        this.ensureCreatureCanMove()
     }
 
     mutateCurrentGenesUp() {
@@ -89,6 +90,20 @@ export class MutationAlgorithm {
             this.genes[feedingGene.id] = new Gene(feedingGene)
             this.gainedGenes.push(feedingGene.id)
         }
+    }
+
+    ensureCreatureCanMove() {
+        if (Object.values(this.genes).some(gene => gene.movementTypes && gene.movementTypes.length))
+            return
+
+        const movementGene = RNG.randomElement([
+            Genes.GENE_LEGS,
+            Genes.GENE_WINGS,
+            Genes.GENE_HOOVES,
+            Genes.GENE_FINS,
+        ])
+        this.genes[movementGene.id] = new Gene(movementGene)
+        this.gainedGenes.push(movementGene)
     }
 
     ensureCarnivoreHasAttack() {

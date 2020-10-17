@@ -2,6 +2,7 @@
 
 import * as Food from './food.js'
 import * as Fight from './fight.js'
+import { MovementType } from './tile.js'
 
 export const GENE_POWER_MIN = 1
 export const GENE_POWER_MAX = 10
@@ -117,6 +118,37 @@ const GENE_SCAVENGER = {
     foodType: Food.CARRION,
 }
 
+const GENE_LEGS = {
+    id: 'LEGS',
+    energyCost: 0,
+    description: 'L',
+    movementTypes: [ MovementType.WALK ],
+    exclusiveFlags: [ 'LEGS' ]
+}
+
+const GENE_WINGS = {
+    id: 'WINGS',
+    energyCost: 5,
+    description: 'W',
+    movementTypes: [ MovementType.FLY ],
+}
+
+const GENE_FINS = {
+    id: 'FINS',
+    energyCost: 2,
+    description: 'F',
+    movementTypes: [ MovementType.SWIM ],
+}
+
+const GENE_HOOVES = {
+    id: 'HOOVES',
+    energyCost: 1,
+    massCost: 1,
+    description: 'H',
+    movementTypes: [ MovementType.WALK, MovementType.CLIMB ],
+    exclusiveFlags: [ 'LEGS', 'LIMB_END' ]
+}
+
 const GENE_CLAWS = {
     id: 'CLAWS',
     energyCost: 1,
@@ -124,7 +156,8 @@ const GENE_CLAWS = {
     attack: {
         [Fight.DMG_PHYSICAL]: 25
     },
-    exclusiveFlags: ['LIMB_END']
+    exclusiveFlags: ['LIMB_END'],
+    movementTypes: [ MovementType.CLIMB ],
 }
 
 const GENE_FANGS = {
@@ -290,6 +323,12 @@ const NON_ESSENTIAL_GENES = [
     GENE_CARNIVORE,
     GENE_SCAVENGER,
 
+    // movement genes
+    GENE_LEGS,
+    GENE_WINGS,
+    GENE_FINS,
+    GENE_HOOVES,
+
     // offensive genes
     GENE_CLAWS,
     GENE_FANGS,
@@ -344,6 +383,11 @@ export {
     GENE_HERBIVORE,
     GENE_CARNIVORE,
     GENE_SCAVENGER,
+
+    GENE_LEGS,
+    GENE_WINGS,
+    GENE_FINS,
+    GENE_HOOVES,
 
     GENE_CLAWS,
     GENE_FANGS,

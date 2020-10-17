@@ -19,7 +19,7 @@ export class TileView {
         let creatures = this.world.creaturesAt(this.tile.x, this.tile.y)
         const creaturesMass = creatures.reduce((sum, c) => { return sum + c.mass() }, 0 )
 
-        header.innerText += `x:${this.tile.x} y:${this.tile.y} 🐘${creaturesMass}/${this.tile.creatureMassCapacity}\n`
+        header.innerText += `${this.tile.id}[${this.tile.x}; ${this.tile.y}] 🐘${creaturesMass}/${this.tile.creatureMassCapacity}\n`
         header.innerText += ` 🌱${this.tile.food[Food.PLANT]}/${this.tile.plantFoodCapacity}\t`
         header.innerText += ` 🍖${this.tile.food[Food.MEAT]}\t`
         header.innerText += ` 🦴${this.tile.food[Food.CARRION]}\n`

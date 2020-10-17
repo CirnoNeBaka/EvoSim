@@ -2,6 +2,7 @@
 
 import { Game } from './js/core/game.js'
 import { World } from './js/core/world.js'
+import { loadMapFromJSON, EXAMPLE_MAP, OASIS_MAP } from './js/mapgen/mapParser.js'
 import { setupGlobalUniverse } from './js/core/universe.js'
 
 import { WorldView } from './js/view/worldView.js'
@@ -10,8 +11,8 @@ import { FullCreatureView } from './js/view/creatureView.js'
 
 setupGlobalUniverse()
 
-let world = new World()
-world.generateTiles()
+let worldMap = loadMapFromJSON(OASIS_MAP)
+let world = new World(worldMap)
 
 let gameEngine = new Game(world)
 let currentTile = null

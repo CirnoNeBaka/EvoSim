@@ -10,7 +10,6 @@ describe('Tiles', function() {
 
     it('tile must have all required keys', function () {
         let tile = new Tile(Tiles.TILE_GRASSLAND)
-        console.log(tile)
         assert.containsAllKeys(tile, [
             'x', 'y',
             'food',
