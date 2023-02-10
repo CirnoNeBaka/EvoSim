@@ -62,6 +62,8 @@ export class MovementAlgorithm {
             bestTiles.push(tiles[i])
 
         const bestTile = (bestTiles.length > 1) ? RNG.randomElement(bestTiles) : tiles[0]
-        this.creature.move(bestTile)
+        
+        let currentTile = this.world.tile(this.creature.x, this.creature.y)
+        this.world.moveCreature(this.creature, currentTile, bestTile)
     }
 }

@@ -8,6 +8,7 @@ import './creature.js'
 import { createBasicCreature } from './creature.js'
 import { FoodStorage } from './tile.js'
 import { Hunt } from './fight.js'
+import * as DMG from './fight.js'
 import { MovementAlgorithm } from './rules/movement.js'
 import { FEEDING_GENES, GENE_CARNIVORE, GENE_HERBIVORE, GENE_LEGS, GENE_SCAVENGER, NON_ESSENTIAL_GENES } from './genes.js'
 
@@ -16,6 +17,7 @@ const BASE_CREATURE_COUNT = 10
 class Game {
     constructor(world) {
         this.world = world
+        this.turnCounter = 0
     }
 
     generateNewCreatures() {
@@ -48,6 +50,7 @@ class Game {
         this.world.forEachTile((tile) => { tile.refresh(); })
         this.generateNewCreatures()
 
+        //this.applyWeather()
         let corpses = this.testSurvivalOfEveryone()
         this.cleanupDead(corpses)
         this.world.forEachCreature((creature) => { creature.energy = 0; })
@@ -57,6 +60,7 @@ class Game {
         this.hunt()
         this.procreate()
         this.world.forEachCreature((creature) => { creature.age++ })
+        this.turnCounter++
         //console.log("===END TURN===")
     }
 
@@ -84,7 +88,7 @@ class Game {
                 creature.kill()
                 let tile = this.world.tile(creature.x, creature.y)
                 tile.creatureMass -= creature.mass()
-                tile.food[Food.CARRION] += creature.mass()
+                tile.food[Food.CARRION] += creature.deathMeat()
                 corpses.push(creature)
             }
         }
@@ -157,6 +161,13 @@ class Game {
         }
     }
 
+    killCreature(creature) {
+        creature.kill()
+        let tile = this.world.tile(creature.x, creature.y)
+        tile.creatureMass -= creature.mass()
+        this.world.creatures.splice(this.world.creatures.indexOf(creature), 1)
+    }
+
     hunt() {
         for (let hunter of this.world.creatures) {
             if (hunter.attack().damageSum() > 0 &&
@@ -165,24 +176,25 @@ class Game {
                 let prey = Hunt.choosePrey(hunter, this.world)
                 if (!prey)
                     continue
-                const attackDamage = hunter.attack().subtract(prey.defence())
+                const attackDamage = hunter.attack()
+                    .multiply(Hunt.massFactor(hunter, prey))
+                    .subtract(prey.defence())
                 const retributionDamage = prey.retribution()
                     .add(prey.attack())
+                    .multiply(Hunt.massFactor(prey, hunter))
                     .subtract(hunter.defence())
-                prey.hp -= attackDamage.damageSum()
-                hunter.hp -= retributionDamage.damageSum()
+                prey.hp -= Math.round(attackDamage.damageSum())
+                hunter.hp -= Math.round(retributionDamage.damageSum())
                 let food = new FoodStorage({ meat: 0 })
                 if (prey.hp <= 0) {
-                    prey.kill()
+                    this.killCreature(prey)
                     food.meat += prey.deathMeat()
                     //console.log(prey, "was killed by", hunter, "for", food.meat, "meat")
-                    this.world.creatures.splice(this.world.creatures.indexOf(prey), 1)
                 }
                 if (hunter.hp <= 0) {
-                    hunter.kill()
+                    this.killCreature(hunter)
                     //console.log("hunter", hunter, "died attacking")
                     food.meat += hunter.deathMeat()
-                    this.world.creatures.splice(this.world.creatures.indexOf(hunter))
                 }
                 //console.log(hunter, 'attacked', prey, "dealt", attackDamage, 'took', retributionDamage, 'gained meat', food.meat)
                 if (hunter.alive) {
@@ -203,8 +215,36 @@ class Game {
                     newborns.push(child)
             }
         })
+
+        let spawnCounter = 0
         for (let c of newborns)
-            this.world.addCreature(c, c.x, c.y)
+            if (this.world.addCreature(c, c.x, c.y))
+                ++spawnCounter
+
+        // if (newborns.length)
+        //     console.log(`new creatures born: ${spawnCounter}/${newborns.length}`)
+    }
+
+    applyWeather() {
+        const dmgType = DMG.DMG_ACID
+        const weatherProbability = 0.99
+        if (RNG.roll01(weatherProbability))
+        {
+            const bad = RNG.roll01(0.1)
+            const dmgValue = Math.round(bad ? RNG.roll(20, 60) : RNG.roll(5, 15))
+            let dmg = new DMG.Damage({ [dmgType]: dmgValue })
+            //console.log(`acid rain! ${acidDmg} dmg`)
+            this.world.forEachCreature((creature) => {
+                const attackDamage = dmg.subtract(creature.defence()).damageSum()
+                creature.hp -= attackDamage
+                if (creature.hp <= 0)
+                {
+                    this.killCreature(creature)
+                    let tile = this.world.tile(creature.x, creature.y)
+                    tile.food.carrion += creature.deathMeat()
+                }
+            })
+        }
     }
 
     cleanupDead(corpses) {

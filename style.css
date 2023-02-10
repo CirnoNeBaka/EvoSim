@@ -12,11 +12,31 @@ h1, p, b, div, td, th {
     grid-gap: 10px;
 }
 
+.mainHeader {
+    width: 100%;
+    display: grid;
+    grid-gap: 10px;
+}
+
+#turnCounter {
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+#creatureCounter {
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
 #worldMapItem,
 #tileViewItem,
 #creatureViewItem {
     height: 100%;
-    max-height: 700px;
+    max-height: 600px;
     border: 2px solid #666666;
     background-color: #222222;
     border-radius: 8px;

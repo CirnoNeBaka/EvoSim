@@ -1,6 +1,7 @@
 'use strict'
 
 import * as Food from './food.js'
+import { Universe } from './universe.js'
 
 export const MovementType = {
     WALK: 'WALK',
@@ -42,7 +43,8 @@ class Tile {
     }
 
     regrowPlantFood() {
-        this.food[Food.PLANT] = this.plantFoodCapacity
+        const delta = Math.round(Universe.food.plantRegrowthRate * this.plantFoodCapacity)
+        this.food[Food.PLANT] = Math.min(this.plantFoodCapacity, this.food[Food.PLANT] + delta)
     }
 }
 

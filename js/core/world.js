@@ -38,6 +38,7 @@ class World {
         let tile = this.tile(x, y)
         if (tile.creatureMass + creature.mass() > tile.creatureMassCapacity)
             return false;
+            
         tile.creatureMass += creature.mass()
         this.creatures.push(creature)
         creature.x = x
@@ -51,6 +52,7 @@ class World {
 
         if (fromTile)
             fromTile.creatureMass -= creature.mass()
+
         if (toTile) {
             creature.x = toTile.x
             creature.y = toTile.y

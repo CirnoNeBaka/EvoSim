@@ -17,7 +17,7 @@ export class TileView {
         let header = document.createElement('p')
     
         let creatures = this.world.creaturesAt(this.tile.x, this.tile.y)
-        const creaturesMass = creatures.reduce((sum, c) => { return sum + c.mass() }, 0 )
+        const creaturesMass = this.tile.creatureMass
 
         header.innerText += `${this.tile.id}[${this.tile.x}; ${this.tile.y}] 🐘${creaturesMass}/${this.tile.creatureMassCapacity}\n`
         header.innerText += ` 🌱${this.tile.food[Food.PLANT]}/${this.tile.plantFoodCapacity}\t`

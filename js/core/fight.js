@@ -66,15 +66,21 @@ class Damage {
 const PREY_SCORE = Symbol('prey_score')
 
 class Hunt {
+    static massFactor(attacker, defender) {
+        return attacker.mass() / defender.mass()
+    }
+
     static choosePrey(hunter, world) {
         const effectiveAttackDamage = (hunter, prey) => {
             return hunter.attack()
+                .multiply(this.massFactor(hunter, prey))
                 .subtract(prey.defence())
                 .damageSum()
         }
         const effectiveRetributionDamage = (hunter, prey) => {
             return prey.retribution()
                 .add(prey.attack())
+                .multiply(this.massFactor(prey, hunter))
                 .subtract(hunter.defence())
                 .damageSum()
         }

@@ -1,9 +1,12 @@
-<h1 id=header>Hello world!</h1>
 <meta charset="utf-8"></meta>
 <head>
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+    <div class="mainHeader">
+        <div id="turnCounter">Turn: 0</div>
+        <div id="creatureCounter">Creatures: 0</div>
+    </div>
     <button type="button" id="stepSimulationButton" onclick="onSimulateOneTurn();">Simulate 1 turn</button>
     <button type="button" id="runSimulationButton" onclick="onToggleSimulation();">Run simulation</button>
     <div class="mainContainer">

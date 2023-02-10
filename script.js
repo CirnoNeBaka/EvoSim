@@ -2,8 +2,8 @@
 
 import { Game } from './js/core/game.js'
 import { World } from './js/core/world.js'
-import { loadMapFromJSON, EXAMPLE_MAP, OASIS_MAP } from './js/mapgen/mapParser.js'
-import { setupGlobalUniverse } from './js/core/universe.js'
+import { loadMapFromJSON, EXAMPLE_MAP, OASIS_MAP, DOUBLE_OASIS_MAP } from './js/mapgen/mapParser.js'
+import { setupGlobalUniverse, Universe } from './js/core/universe.js'
 
 import { WorldView } from './js/view/worldView.js'
 import { TileView } from './js/view/tileView.js'
@@ -11,7 +11,7 @@ import { FullCreatureView } from './js/view/creatureView.js'
 
 setupGlobalUniverse()
 
-let worldMap = loadMapFromJSON(OASIS_MAP)
+let worldMap = loadMapFromJSON(EXAMPLE_MAP)
 let world = new World(worldMap)
 
 let gameEngine = new Game(world)
@@ -28,6 +28,12 @@ function renderWorld() {
     let worldMapItem = document.getElementById('worldMapItem')
     worldMapItem.innerHTML = ''
     worldMapItem.append(worldView.generateHTML())
+
+    let turnCounterItem = document.getElementById('turnCounter')
+    turnCounterItem.innerHTML = `Turn: ${gameEngine.turnCounter}`
+
+    let creatureCounterItem = document.getElementById('creatureCounter')
+    creatureCounterItem.innerHTML = `Creatures: ${world.creatures.length}`
 }
 
 function renderTile() {
@@ -65,10 +71,9 @@ function onToggleSimulation() {
         stepButton.removeAttribute('disabled')
 
     if (isSimulationRunning) {
-        const INTERVAL = 250
         let exec = () => {
             onSimulateOneTurn()
-            cancelHandle = setTimeout(exec, INTERVAL)
+            cancelHandle = setTimeout(exec, Universe.world.simulationTickMS)
         }
         exec()
     } else {

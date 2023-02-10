@@ -71,7 +71,8 @@ class Creature {
         stats.regeneration = 5 + this.genePower('REGENERATION') * 10
         stats.energyConsumption = stats.bioMass + Object.values(this.genes).reduce((acc, gene) => {
             return acc + gene.power * gene.energyCost
-        }, 0)
+        }, 0) + (this.movementTypes().size - 1) * 10
+    
         stats.fatCapacity = this.hasGene('FAT') ? this.genePower('FAT') * 25 : 0
         stats.lifespan = this.genePower('LONGEVITY') * 10
         stats.divideChance = this.genePower('FERTILITY') / 10.0
@@ -92,7 +93,8 @@ class Creature {
         const isSpecialized = myFeedingGenes.length === 1
         const specializationBonus = Universe.food.specializtionBonus(isSpecialized ? this.genePower(myFeedingGenes[0].id) : 0)
         return FEEDING_GENES.reduce((result, gene) => {
-            result[gene.foodType] = (this.genePower(gene.id) / totalFoodGenesScore) * specializationBonus
+            result[gene.foodType] = (this.genePower(gene.id) / totalFoodGenesScore)
+                * specializationBonus
             return result
         }, {})
     }
