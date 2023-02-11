@@ -2,19 +2,31 @@
 
 import { Game } from './js/core/game.js'
 import { World } from './js/core/world.js'
-import { loadMapFromJSON, EXAMPLE_MAP, OASIS_MAP, DOUBLE_OASIS_MAP } from './js/mapgen/mapParser.js'
+import * as Maps from './js/mapgen/mapParser.js'
 import { setupGlobalUniverse, Universe } from './js/core/universe.js'
 
 import { WorldView } from './js/view/worldView.js'
 import { TileView } from './js/view/tileView.js'
 import { FullCreatureView } from './js/view/creatureView.js'
+import { WeatherPattern, WeatherStats, WeatherType } from './js/core/weather.js'
+import * as DMG from './js/core/fight.js'
 
 setupGlobalUniverse()
 
-let worldMap = loadMapFromJSON(EXAMPLE_MAP)
+let worldMap = Maps.loadMapFromJSON(Maps.EXAMPLE_MAP)
 let world = new World(worldMap)
+let weatherAcid = [
+    new WeatherPattern(WeatherType.Global, 0.99, new WeatherStats(DMG.DMG_ACID, 1, 5), "acid fog"),
+    new WeatherPattern(WeatherType.Global, 0.10, new WeatherStats(DMG.DMG_ACID, 20, 40), "acid rain"),
+    new WeatherPattern(WeatherType.Local,  0.05, new WeatherStats(DMG.DMG_ACID, 40, 80, 1, 2), "acid explosion"),
+]
+let weatherCold = [
+    new WeatherPattern(WeatherType.Global, 0.99, new WeatherStats(DMG.DMG_COLD, 1, 5), "snowfall"),
+    new WeatherPattern(WeatherType.Global, 0.10, new WeatherStats(DMG.DMG_COLD, 10, 30), "snowstorm"),
+    new WeatherPattern(WeatherType.Local,  0.05, new WeatherStats(DMG.DMG_COLD, 30, 60, 1, 2), "blizzard"),
+]
 
-let gameEngine = new Game(world)
+let gameEngine = new Game(world, [])
 let currentTile = null
 let currentCreature = null
 

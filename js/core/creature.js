@@ -54,7 +54,8 @@ class Creature {
         this.energy = this.energyConsumption()
         this.fat = 0
         this.age = 0
-        this.generation = 0        
+        this.generation = 0
+        this.originalAncestorID = ""
     }
 
     // basic stats depend only on genes and remain constant during a creature's life
@@ -201,7 +202,10 @@ class Creature {
     }
 
     energyGain(foodType, foodAmount) {
-        return Math.round(this.basicStats.foodEfficiency[foodType] * foodAmount)
+        return Math.round(foodAmount
+            * this.basicStats.foodEfficiency[foodType]
+            * Universe.food.energyTransferRate[foodType]
+        )
     }
 
     feed(food) {
@@ -211,11 +215,12 @@ class Creature {
             let energyDeficit = limit - this[deposit]
             for (let type of food.types()) {
                 if (this.canEat(type)) {
-                    const foodConsumed = Math.min(food[type], energyDeficit)
-                    const energyGained = this.energyGain(type, foodConsumed)
-                    //console.log(`Consumed ${foodConsumed} ${type.toString()} as ${energyGained} energy`, this.foodEfficiency)
-                    food[type] -= foodConsumed
-                    this[deposit] += Math.min(energyGained, limit)
+                    const requiredFood = Math.ceil(energyDeficit / Universe.food.energyTransferRate[type])
+                    const consumedFood = Math.min(food[type], requiredFood)
+                    const energyGained = this.energyGain(type, consumedFood)
+                    //console.log(`Consumed ${consumedFood} ${type.toString()} as ${energyGained} energy`, this.foodEfficiency)
+                    food[type] -= consumedFood
+                    this[deposit] = Math.min(this[deposit] + energyGained, limit)
                     energyDeficit -= Math.max(0, energyGained)
                 }
             }
@@ -226,9 +231,12 @@ class Creature {
 
         if (this.hasGene('FAT')) {
             const energyDeficit = this.energyConsumption() - this.energy
-            const energyGainedFromFat = Math.min(this.fat, energyDeficit)
-            this.energy += energyGainedFromFat
-            this.fat -= energyGainedFromFat
+            const fatRequired = Math.ceil(energyDeficit / Universe.food.energyTransferRate.fat)
+            const fatBurned = Math.min(this.fat, fatRequired)
+            const energyGainedFromFat = Math.round(fatBurned * Universe.food.energyTransferRate.fat)
+            this.energy += Math.min(energyDeficit, energyGainedFromFat)
+            this.fat -= fatBurned
+            //console.log(`fat: +${energyGainedFromFat}E -${fatBurned}fat`)
 
             consume('fat', this.fatCapacity())
         }
@@ -244,6 +252,7 @@ class Creature {
 
         let child = new Creature(newGenes, this.x, this.y)
         child.generation = this.generation + 1
+        child.originalAncestorID = this.originalAncestorID
       
         // console.log("creature", this, "divided!", child)
         // if (mutations.mutatedGenes.length)

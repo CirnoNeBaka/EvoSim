@@ -15,8 +15,9 @@ import { FEEDING_GENES, GENE_CARNIVORE, GENE_HERBIVORE, GENE_LEGS, GENE_SCAVENGE
 const BASE_CREATURE_COUNT = 10
 
 class Game {
-    constructor(world) {
+    constructor(world, weatherPatterns) {
         this.world = world
+        this.weatherPatterns = weatherPatterns
         this.turnCounter = 0
     }
 
@@ -40,6 +41,7 @@ class Game {
             ) : GENE_LEGS
             const feedingGene = RNG.randomElement(FEEDING_GENES)
             const worm = createBasicCreature(feedingGene, movementType)
+            worm.originalAncestorID = Math.round(Math.random() * 0xFFFFFF).toString(16).toUpperCase()
             this.world.addCreature(worm, x, y)
             //console.log(`Worm spawned!`, worm)
         }
@@ -50,7 +52,6 @@ class Game {
         this.world.forEachTile((tile) => { tile.refresh(); })
         this.generateNewCreatures()
 
-        //this.applyWeather()
         let corpses = this.testSurvivalOfEveryone()
         this.cleanupDead(corpses)
         this.world.forEachCreature((creature) => { creature.energy = 0; })
@@ -58,6 +59,7 @@ class Game {
         this.moveCreatures()
         this.feedCreatures()
         this.hunt()
+        this.applyWeather()
         this.procreate()
         this.world.forEachCreature((creature) => { creature.age++ })
         this.turnCounter++
@@ -86,6 +88,7 @@ class Game {
             const survived = survivedHunger && survivedOldAge
             if (!survived) {
                 creature.kill()
+                creature.deathReason = survivedHunger ? "old age" : "hunger"
                 let tile = this.world.tile(creature.x, creature.y)
                 tile.creatureMass -= creature.mass()
                 tile.food[Food.CARRION] += creature.deathMeat()
@@ -161,13 +164,6 @@ class Game {
         }
     }
 
-    killCreature(creature) {
-        creature.kill()
-        let tile = this.world.tile(creature.x, creature.y)
-        tile.creatureMass -= creature.mass()
-        this.world.creatures.splice(this.world.creatures.indexOf(creature), 1)
-    }
-
     hunt() {
         for (let hunter of this.world.creatures) {
             if (hunter.attack().damageSum() > 0 &&
@@ -187,12 +183,12 @@ class Game {
                 hunter.hp -= Math.round(retributionDamage.damageSum())
                 let food = new FoodStorage({ meat: 0 })
                 if (prey.hp <= 0) {
-                    this.killCreature(prey)
+                    this.world.killCreature(prey, "predator")
                     food.meat += prey.deathMeat()
                     //console.log(prey, "was killed by", hunter, "for", food.meat, "meat")
                 }
                 if (hunter.hp <= 0) {
-                    this.killCreature(hunter)
+                    this.world.killCreature(hunter, "prey retribution")
                     //console.log("hunter", hunter, "died attacking")
                     food.meat += hunter.deathMeat()
                 }
@@ -226,24 +222,8 @@ class Game {
     }
 
     applyWeather() {
-        const dmgType = DMG.DMG_ACID
-        const weatherProbability = 0.99
-        if (RNG.roll01(weatherProbability))
-        {
-            const bad = RNG.roll01(0.1)
-            const dmgValue = Math.round(bad ? RNG.roll(20, 60) : RNG.roll(5, 15))
-            let dmg = new DMG.Damage({ [dmgType]: dmgValue })
-            //console.log(`acid rain! ${acidDmg} dmg`)
-            this.world.forEachCreature((creature) => {
-                const attackDamage = dmg.subtract(creature.defence()).damageSum()
-                creature.hp -= attackDamage
-                if (creature.hp <= 0)
-                {
-                    this.killCreature(creature)
-                    let tile = this.world.tile(creature.x, creature.y)
-                    tile.food.carrion += creature.deathMeat()
-                }
-            })
+        for (let wp of this.weatherPatterns) {
+            wp.processTurn(this.world)
         }
     }
 

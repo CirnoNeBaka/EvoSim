@@ -104,6 +104,14 @@ const TILE_HIGH_MOUNTAINS = {
     symbol: 'M',
 }
 
+const TILE_VOID = {
+    id: 'void',
+    plantFoodCapacity: 0,
+    creatureMassCapacity: 0,
+    movementTypes: [ ],
+    symbol: ' ',
+}
+
 export {
     FoodStorage,
     Tile,
@@ -115,4 +123,5 @@ export {
     TILE_RIVER,
     TILE_SEA,
     TILE_HIGH_MOUNTAINS,
+    TILE_VOID,
 }

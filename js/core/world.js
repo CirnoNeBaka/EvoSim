@@ -61,6 +61,28 @@ class World {
         return true
     }
 
+    // returns true if creature survived damage
+    damageCreature(creature, dmg, source) {
+        const dmgDealt = Math.round(dmg.subtract(creature.defence()).damageSum())
+        creature.hp -= dmgDealt
+
+        if (creature.hp <= 0) {
+            this.killCreature(creature, source)
+            return false
+        }
+
+        return true
+    }
+
+    killCreature(creature, source) {
+        creature.kill()
+        creature.deathReason = source
+
+        let tile = this.tile(creature.x, creature.y)
+        tile.creatureMass -= creature.mass()
+        this.creatures.splice(this.creatures.indexOf(creature), 1)
+    }
+
     adjacentTiles(x, y) {
         if (x !== undefined && y === undefined)
             return this.adjacentTiles(x.x, x.y)

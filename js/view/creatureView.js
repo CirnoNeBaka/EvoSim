@@ -141,6 +141,9 @@ export class FullCreatureView {
             table.append(tr)
         }
 
+        if (!this.creature.alive) {
+            addView('Killed by:', `${this.creature.deathReason}`)
+        }
         addView(`x:${this.creature.x} y:${this.creature.y}`, '')
         addView('💖Health:', this.creature.hp, this.creature.maxHP())
         addView('💙Energy:', this.creature.energy, this.creature.energyConsumption())
@@ -151,7 +154,7 @@ export class FullCreatureView {
         addView('Speed:', this.creature.speed())
         addView('Regeneration:', `+${this.creature.regeneration()} HP / turn`)
         addView('Divide chance:', `${this.creature.divideChance().toFixed(2) * 100.0}% / turn`)
-        addView('Generation:', `${this.creature.generation} ancestors`)
+        addView('Ancestry:', `${this.creature.originalAncestorID} / #${this.creature.generation}`)
 
         return table
     }
@@ -164,6 +167,7 @@ export class FullCreatureView {
         if (!this.creature.alive) {
             let button = document.createElement('button')
             button.innerHTML = '<p class="deadLabel">DEAD</p>'
+            button.setAttribute('id', 'deadButton')
             button.setAttribute('onclick', `window.onClickCreature(-1)`)
             container.append(button)
         }

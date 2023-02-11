@@ -87,8 +87,12 @@ const GENE_FERTILITY = {
 
 const GENE_FAT = {
     id: 'FAT',
-    energyCost: 5,
+    energyCost: 2,
     description: '💛',
+    defence: {
+        [Fight.DMG_PHYSICAL]: 2,
+        [Fight.DMG_COLD]: 10
+    },
 }
 
 const GENE_REGENERATION = {
@@ -180,7 +184,7 @@ const GENE_STING = {
 
 const GENE_FIRE_BREATH = {
     id: 'FIRE_BREATH',
-    energyCost: 4,
+    energyCost: 3,
     description: '⚔FIR',
     attack: {
         [Fight.DMG_FIRE]: 25
@@ -190,7 +194,7 @@ const GENE_FIRE_BREATH = {
 
 const GENE_ACID_SPIT = {
     id: 'ACID_SPIT',
-    energyCost: 4,
+    energyCost: 3,
     description: '⚔ACD',
     attack: {
         [Fight.DMG_ACID]: 25
@@ -260,7 +264,7 @@ const GENE_NEEDLES = {
 
 const GENE_SPIKES = {
     id: 'SPIKES',
-    energyCost: 2,
+    energyCost: 1,
     massCost: 5,
     description: '🛡⚔SPK',
     retribution: {
@@ -282,7 +286,7 @@ const GENE_HORNS = {
 
 const GENE_BURNING_SKIN = {
     id: 'BURNING_SKIN',
-    energyCost: 4,
+    energyCost: 3,
     massCost: 0,
     description: '🛡⚔FIR',
     defence: {
@@ -296,7 +300,7 @@ const GENE_BURNING_SKIN = {
 
 const GENE_ACID_SKIN = {
     id: 'ACID_SKIN',
-    energyCost: 4,
+    energyCost: 3,
     massCost: 0,
     description: '🛡⚔ACD',
     defence: {

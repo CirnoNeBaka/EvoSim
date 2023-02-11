@@ -2,7 +2,7 @@
 
 const FOOD_PLANT = 'plant'
 const FOOD_MEAT = 'meat'
-const FOOD_CARRION = 'çarrion'
+const FOOD_CARRION = 'carrion'
 
 const FOOD_TYPES = [
     FOOD_PLANT,

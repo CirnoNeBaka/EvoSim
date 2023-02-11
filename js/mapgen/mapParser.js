@@ -1,6 +1,6 @@
 'use strict'
 
-import { Tile, TILE_DESERT, TILE_FOREST, TILE_GRASSLAND, TILE_HIGH_MOUNTAINS, TILE_RIVER, TILE_SAVANNAH, TILE_SEA } from '../core/tile.js'
+import { Tile, TILE_VOID, TILE_DESERT, TILE_FOREST, TILE_GRASSLAND, TILE_HIGH_MOUNTAINS, TILE_RIVER, TILE_SAVANNAH, TILE_SEA } from '../core/tile.js'
 
 export const EXAMPLE_MAP = {
     "legend": [
@@ -10,7 +10,8 @@ export const EXAMPLE_MAP = {
         ". - desert",
         "= - river",
         "~ - sea",
-        "M - high mountains"
+        "M - high mountains",
+        "  - void",
     ],
     "tiles": [
         "~~~~~~~~~~",
@@ -54,6 +55,48 @@ export const DOUBLE_OASIS_MAP = {
     ]
 }
 
+export const MOUNTAIN_RING_MAP = {
+    "tiles": [
+        "....:....",
+        "...:M:...",
+        "..:M/M:..",
+        ".:M/=/M:.",
+        ".:M/=/M:.",
+        ".:M/=/M:.",
+        "..:M/M:..",
+        "...:M:...",
+        "....:...."
+    ]
+}
+
+export const VOID_RING_MAP = {
+    "tiles": [
+        "....:....",
+        "...: :...",
+        "..: / :..",
+        ".: /=/ :.",
+        ".: /=/ :.",
+        ".: /=/ :.",
+        "..: / :..",
+        "...: :...",
+        "....:...."
+    ]
+}
+
+export const LABYRINTH_MAP = {
+    "tiles": [
+        "         ",
+        " / /// / ",
+        " /// / / ",
+        "     /// ",
+        " ///// / ",
+        " /     / ",
+        " //      ",
+        "  //// / ",
+        " //  /// ",
+    ]
+}
+
 const TILES = [
     TILE_FOREST,
     TILE_GRASSLAND,
@@ -62,6 +105,7 @@ const TILES = [
     TILE_RIVER,
     TILE_SEA,
     TILE_HIGH_MOUNTAINS,
+    TILE_VOID,
 ]
 
 function parseTile(symbol) {

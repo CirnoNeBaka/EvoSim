@@ -1,6 +1,7 @@
 'use strict'
 
 import * as RNG from './rng.js'
+import { Universe } from './universe.js'
 
 const DMG_PHYSICAL = 'physical' // Symbol('physical')
 const DMG_FIRE = 'fire' // Symbol('fire')
@@ -67,7 +68,7 @@ const PREY_SCORE = Symbol('prey_score')
 
 class Hunt {
     static massFactor(attacker, defender) {
-        return attacker.mass() / defender.mass()
+        return (attacker.mass() / defender.mass()) * Universe.fight.sizeFactor
     }
 
     static choosePrey(hunter, world) {
